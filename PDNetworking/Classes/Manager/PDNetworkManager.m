@@ -76,7 +76,7 @@ static PDNetworkManager *__defaultManager;
 }
 
 #pragma mark - Public Methods
-- (void)addRequest:(__kindof PDNetworkRequest *)request {
+- (void)addRequest:(PDNetworkRequest *)request {
     if (!request.requestID) {
         NSAssert(NO, @"Invalid argument `request`, check it!");
         return;
@@ -95,7 +95,9 @@ static PDNetworkManager *__defaultManager;
     Unlock();
     
     if (executor) { [executor cancel]; }
+    
     executor = [self executorForRequest:request];
+    if (!executor) { return; }
     
     Lock();
     self.requestMap[request.requestID] = request;
@@ -113,7 +115,7 @@ static PDNetworkManager *__defaultManager;
     }];
 }
 
-- (void)cancelRequestsWithFilter:(BOOL (^)(__kindof PDNetworkRequest * _Nonnull))filter {
+- (void)cancelRequestsWithFilter:(BOOL (^)(PDNetworkRequest * _Nonnull))filter {
     NSAssert(filter, @"The argument `filter` can not be nil!");
     if (!filter) { return; }
     
@@ -125,7 +127,7 @@ static PDNetworkManager *__defaultManager;
     }];
 }
 
-- (void)cancelRequest:(__kindof PDNetworkRequest *)request {
+- (void)cancelRequest:(PDNetworkRequest *)request {
     Lock();
     PDNetworkRequestExecutor *executor = self.executorMap[request.requestID];
     [self.requestMap removeObjectForKey:request.requestID];
@@ -136,8 +138,8 @@ static PDNetworkManager *__defaultManager;
 }
 
 - (void)cancelAllRequests {
-    NSDictionary<NSString *, __kindof PDNetworkRequest *> *requests = [_requestMap copy];
-    [requests enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, __kindof PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
+    NSDictionary<NSString *, PDNetworkRequest *> *requests = [_requestMap copy];
+    [requests enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
         [obj cancel];
     }];
 }
