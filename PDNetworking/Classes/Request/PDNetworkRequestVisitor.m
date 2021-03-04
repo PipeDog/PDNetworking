@@ -55,7 +55,7 @@ static inline AFHTTPResponseSerializer *_PDHTTPResponseSerializer(void) {
 }
 
 - (BOOL)shouldContinueRequestingAfterHandleCache {
-    if (_request.action != PDNetworkRequestActionNormal) {
+    if (_request.action != PDNetworkRequestActionRegular) {
         return YES;
     }
 
@@ -99,7 +99,7 @@ static inline AFHTTPResponseSerializer *_PDHTTPResponseSerializer(void) {
 }
 
 - (id)cachedData {
-    if (_request.action != PDNetworkRequestActionNormal) { return nil; }
+    if (_request.action != PDNetworkRequestActionRegular) { return nil; }
     if (_request.cachePolicy == PDNetworkRequestReloadIgnoringCacheData) { return nil; }
 
     id<PDNetworkCache> cache = [PDNetworkManager defaultManager].cache;
@@ -118,7 +118,7 @@ static inline AFHTTPResponseSerializer *_PDHTTPResponseSerializer(void) {
 }
 
 - (void)setCacheData:(id)cacheData {
-    if (_request.action != PDNetworkRequestActionNormal) { return; }
+    if (_request.action != PDNetworkRequestActionRegular) { return; }
     if (_request.cachePolicy == PDNetworkRequestReloadIgnoringCacheData) { return; }
 
     id<PDNetworkCache> cache = [PDNetworkManager defaultManager].cache;
@@ -163,7 +163,7 @@ static inline AFHTTPResponseSerializer *_PDHTTPResponseSerializer(void) {
         if (_request.urlPath.length > 0) {
             URLString = [URLString stringByAppendingString:_request.urlPath];
         }
-        if (![NSURL URLWithString:_URLString]) {
+        if (![NSURL URLWithString:URLString]) {
             URLString = [URLString encodeWithURLQueryAllowedCharacterSet];
         }
         

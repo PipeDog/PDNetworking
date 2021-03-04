@@ -34,7 +34,7 @@
 #pragma mark - Public Methods
 - (instancetype)sendWithSuccess:(void (^)(id<PDNetworkResponse> _Nonnull))success
                         failure:(void (^)(id<PDNetworkResponse> _Nonnull))failure {
-    self.action = PDNetworkRequestActionNormal;
+    self.action = PDNetworkRequestActionRegular;
     self.success = success;
     self.failure = failure;
     [[PDNetworkManager defaultManager] addRequest:self];

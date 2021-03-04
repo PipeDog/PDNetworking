@@ -15,6 +15,5 @@
 #import "PDNetworkManager+Constructing.h"
 #import "PDNetworkRequest+Build.h"
 #import "PDNetworkPlugin.h"
-#import "PDNetworkPluginCollector.h"
 
 #endif /* PDNetworking_h */
