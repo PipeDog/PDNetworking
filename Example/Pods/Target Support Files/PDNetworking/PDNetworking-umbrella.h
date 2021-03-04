@@ -10,13 +10,12 @@
 #endif
 #endif
 
+#import "PDNetworkCache.h"
+#import "PDNetworkDefaultCache.h"
+#import "PDNetworkDefinition.h"
 #import "PDNetworkManager+Constructing.h"
 #import "PDNetworkManager+Internal.h"
 #import "PDNetworkManager.h"
-#import "PDNetworkCache.h"
-#import "PDNetworkDefaultCache.h"
-#import "PDNetworkConfiguration.h"
-#import "PDNetworkDefinition.h"
 #import "PDNetworking.h"
 #import "PDNetworkPlugin.h"
 #import "PDNetworkPluginManager.h"
@@ -26,8 +25,8 @@
 #import "PDNetworkRequestDefines.h"
 #import "PDNetworkRequestVisitor.h"
 #import "PDNetworkResponse.h"
-#import "PDNetworkDataUtil.h"
 #import "NSString+PDNetworking.h"
+#import "PDNetworkDataUtil.h"
 
 FOUNDATION_EXPORT double PDNetworkingVersionNumber;
 FOUNDATION_EXPORT const unsigned char PDNetworkingVersionString[];
