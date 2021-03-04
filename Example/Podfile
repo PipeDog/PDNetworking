@@ -4,6 +4,8 @@ platform :ios, '9.0'
 
 target 'PDNetworking_Example' do
   pod 'PDNetworking', :path => '../'
+  pod 'AFNetworking'
+  pod 'YYCache'
 
   target 'PDNetworking_Tests' do
     inherit! :search_paths
