@@ -9,7 +9,6 @@
 #import "PDNetworkRequest.h"
 #import "PDNetworkRequest+Internal.h"
 #import "PDNetworkManager.h"
-#import "PDNetworkRequestVisitor.h"
 #import "PDNKCodecUUID.h"
 
 @implementation PDNetworkRequest {
@@ -26,7 +25,6 @@
         _serializerType = PDNetworkRequestSerializerTypeHTTP;
         _cachePolicy = PDNetworkRequestReloadIgnoringCacheData;
         _autoRetryTimes = PDNetworkRequestDefaultAutoRetryTimes;
-        _currentRetryTimes = 0;
     }
     return self;
 }
@@ -34,7 +32,7 @@
 #pragma mark - Public Methods
 - (instancetype)sendWithSuccess:(void (^)(id<PDNetworkResponse> _Nonnull))success
                         failure:(void (^)(id<PDNetworkResponse> _Nonnull))failure {
-    self.action = PDNetworkRequestActionRegular;
+    self.actionType = PDNetworkRequestActionRegular;
     self.success = success;
     self.failure = failure;
     [[PDNetworkManager defaultManager] addRequest:self];
@@ -47,7 +45,7 @@
                              failure:(void (^)(id<PDNetworkDownloadResponse> _Nonnull))failure {
     NSAssert(destination != nil, @"The block `destination` can not be nil!");
     
-    self.action = PDNetworkRequestActionDownload;
+    self.actionType = PDNetworkRequestActionDownload;
     self.downloadProgress = downloadProgressBlock;
     self.destination = destination;
     self.downloadSuccess = success;
@@ -60,7 +58,7 @@
                                   progress:(void (^)(NSProgress * _Nonnull))uploadProgress
                                    success:(void (^)(id<PDNetworkUploadResponse> _Nonnull))success
                                    failure:(void (^)(id<PDNetworkUploadResponse> _Nonnull))failure {
-    self.action = PDNetworkRequestActionUpload;
+    self.actionType = PDNetworkRequestActionUpload;
     self.constructingBody = block;
     self.uploadProgress = uploadProgress;
     self.uploadSuccess = success;
@@ -81,7 +79,7 @@
 }
 
 #pragma mark - Private Methods
-- (void)clearRequestBlocks {
+- (void)removeRequestBlocks {
     _success = nil;
     _failure = nil;
     _downloadProgress = nil;
@@ -94,20 +92,9 @@
     _uploadFailure = nil;
 }
 
-- (void)setNeedsUpdate {
-    _visitor = nil;
-}
-
 #pragma mark - Getter Methods
 - (BOOL)isExecuting {
     return (self.sessionTask.state == NSURLSessionTaskStateRunning);
-}
-
-- (PDNetworkRequestVisitor *)visitor {
-    if (!_visitor) {
-        _visitor = [[PDNetworkRequestVisitor alloc] initWithRequest:self];
-    }
-    return _visitor;
 }
 
 @end

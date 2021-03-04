@@ -12,18 +12,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class PDNetworkRequestVisitor;
 
-typedef NS_ENUM(NSUInteger, PDNetworkRequestAction) {
-    PDNetworkRequestActionRegular = 0,
-    PDNetworkRequestActionDownload,
-    PDNetworkRequestActionUpload,
+typedef NS_ENUM(NSUInteger, PDNetworkRequestActionType) {
+    PDNetworkRequestActionRegular   = 0,
+    PDNetworkRequestActionDownload  = 1,
+    PDNetworkRequestActionUpload    = 2,
 };
 
 @interface PDNetworkRequest ()
 
 @property (nonatomic, strong, nullable) NSURLSessionTask *sessionTask;
-@property (nonatomic, assign) NSUInteger currentRetryTimes; // Record the current number of retries.
-@property (nonatomic, strong) PDNetworkRequestVisitor *visitor;
-@property (nonatomic, assign) PDNetworkRequestAction action;
+@property (nonatomic, assign) PDNetworkRequestActionType actionType;
 
 @property (nonatomic, copy, nullable) void (^success)(id<PDNetworkResponse>);
 @property (nonatomic, copy, nullable) void (^failure)(id<PDNetworkResponse>);
@@ -38,8 +36,7 @@ typedef NS_ENUM(NSUInteger, PDNetworkRequestAction) {
 @property (nonatomic, copy, nullable) void (^uploadProgress)(NSProgress *);
 @property (nonatomic, copy, nullable) void (^constructingBody)(id<PDMultipartFormData>);
 
-- (void)clearRequestBlocks;
-- (void)setNeedsUpdate;
+- (void)removeRequestBlocks;
 
 @end
 

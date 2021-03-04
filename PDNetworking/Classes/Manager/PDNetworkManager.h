@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (class, strong, readonly) PDNetworkManager *defaultManager;
 
-@property (nonatomic, strong) id<PDNetworkCache> cache;
+@property (nonatomic, strong) id<PDNetworkCache> networkCache;
 
 - (void)addRequest:(__kindof PDNetworkRequest *)request;
 
