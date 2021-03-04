@@ -10,22 +10,22 @@
 #import "PDNetworkRequest+Internal.h"
 #import "PDNetworkManager.h"
 #import "PDNetworkRequestVisitor.h"
+#import "PDNKCodecUUID.h"
 
-NSTimeInterval const PDNetworkRequestTimeoutInterval = 30.f;
-NSUInteger const PDNetworkRequestAutoRetryTimes = 3;
-
-@implementation PDNetworkRequest
+@implementation PDNetworkRequest {
+    PDNetworkRequestID _requestID;
+}
 
 @dynamic executing;
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _timeoutInterval = PDNetworkRequestTimeoutInterval;
+        _timeoutInterval = PDNetworkRequestDefaultTimeoutInterval;
         _requestMethod = PDNetworkRequestMethodPOST;
         _serializerType = PDNetworkRequestSerializerTypeHTTP;
         _cachePolicy = PDNetworkRequestReloadIgnoringCacheData;
-        _autoRetryTimes = PDNetworkRequestAutoRetryTimes;
+        _autoRetryTimes = PDNetworkRequestDefaultAutoRetryTimes;
         _currentRetryTimes = 0;
     }
     return self;
@@ -71,6 +71,13 @@ NSUInteger const PDNetworkRequestAutoRetryTimes = 3;
 
 - (void)cancel {
     [[PDNetworkManager defaultManager] cancelRequest:self];
+}
+
+- (PDNetworkRequestID)requestID {
+    if (!_requestID) {
+        _requestID = [PDNKCodecUUID UUID].UUIDString;
+    }
+    return _requestID;
 }
 
 #pragma mark - Private Methods

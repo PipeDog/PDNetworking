@@ -28,11 +28,11 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _timeoutInterval = PDNetworkRequestTimeoutInterval;
+        _timeoutInterval = PDNetworkRequestDefaultTimeoutInterval;
         _requestMethod = PDNetworkRequestMethodPOST;
         _serializerType = PDNetworkRequestSerializerTypeHTTP;
         _cachePolicy = PDNetworkRequestReloadIgnoringCacheData;
-        _autoRetryTimes = PDNetworkRequestAutoRetryTimes;
+        _autoRetryTimes = PDNetworkRequestDefaultAutoRetryTimes;
     }
     return self;
 }

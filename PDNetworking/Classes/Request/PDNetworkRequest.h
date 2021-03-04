@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "PDNetworkResponse.h"
-#import "PDNetworkRequestDefines.h"
+#import "PDNetworkDefinition.h"
 #if __has_include(<AFNetworking/AFNetworking.h>)
 #import <AFNetworking/AFNetworking.h>
 #else
@@ -18,6 +18,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol PDMultipartFormData;
+
+typedef NSString * PDNetworkRequestID;
 
 @interface PDNetworkRequest : NSObject
 
@@ -49,6 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
                                    failure:(void (^ __nullable)(id<PDNetworkUploadResponse> response))failure;
 
 - (void)cancel;
+- (PDNetworkRequestID)requestID;
 
 @end
 

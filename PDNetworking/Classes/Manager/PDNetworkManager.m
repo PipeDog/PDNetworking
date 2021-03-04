@@ -16,22 +16,20 @@
 #import "PDNetworkRequestVisitor.h"
 #import "PDNetworkDefaultCache.h"
 #import "PDNetworkDataUtil.h"
+#import "PDNetworkRequestExecutor.h"
 
 #define Lock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
 #define Unlock() dispatch_semaphore_signal(self->_lock)
 
-static inline NSString *Hash(id<NSObject> object) {
-    NSString *key;
-    if ([object respondsToSelector:@selector(hash)]) {
-        key = [NSString stringWithFormat:@"%lu", (unsigned long)[object hash]];
-    }
-    return key;
-}
+@interface PDNetworkManager ()
 
-@implementation PDNetworkManager {
-    dispatch_semaphore_t _lock;
-    NSMutableDictionary<NSString *, __kindof PDNetworkRequest *> *_requests;
-}
+@property (nonatomic, strong) dispatch_semaphore_t lock;
+@property (nonatomic, strong) NSMutableDictionary<PDNetworkRequestID, PDNetworkRequest *> *requestMap;
+@property (nonatomic, strong) NSMutableDictionary<PDNetworkRequestID, PDNetworkRequestExecutor *> *executorMap;
+
+@end
+
+@implementation PDNetworkManager
 
 static PDNetworkManager *__defaultManager;
 
@@ -58,7 +56,8 @@ static PDNetworkManager *__defaultManager;
     self = [super init];
     if (self) {
         _lock = dispatch_semaphore_create(1);
-        _requests = [NSMutableDictionary dictionary];
+        _requestMap = [NSMutableDictionary dictionary];
+        _executorMap = [NSMutableDictionary dictionary];
         _sessionManager = [AFHTTPSessionManager manager];
         
         NSString *cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
@@ -105,7 +104,7 @@ static PDNetworkManager *__defaultManager;
     NSAssert(filter, @"The argument `filter` can not be nil!");
     if (!filter) { return; }
     
-    NSDictionary<NSString *, __kindof PDNetworkRequest *> *requests = [_requests copy];
+    NSDictionary<NSString *, __kindof PDNetworkRequest *> *requests = [_requestMap copy];
     [requests enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, __kindof PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
         if (filter(obj)) {
             [obj cancel];
@@ -121,7 +120,7 @@ static PDNetworkManager *__defaultManager;
 }
 
 - (void)cancelAllRequests {
-    NSDictionary<NSString *, __kindof PDNetworkRequest *> *requests = [_requests copy];
+    NSDictionary<NSString *, __kindof PDNetworkRequest *> *requests = [_requestMap copy];
     [requests enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, __kindof PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
         [obj cancel];
     }];
@@ -129,23 +128,17 @@ static PDNetworkManager *__defaultManager;
 
 #pragma mark - Hold Request
 - (void)_addRequest:(__kindof PDNetworkRequest *)request {
-    NSString *key = Hash(request.sessionTask);
-    
-    if (key.length) {
-        Lock();
-        _requests[key] = request;
-        Unlock();
-    }
+    PDNetworkRequestID requestID = request.requestID;
+    Lock();
+    _requestMap[requestID] = request;
+    Unlock();
 }
 
 - (void)_removeRequest:(__kindof PDNetworkRequest *)request {
-    NSString *key = Hash(request.sessionTask);
-
-    if (key.length) {
-        Lock();
-        [_requests removeObjectForKey:key];
-        Unlock();
-    }
+    PDNetworkRequestID requestID = request.requestID;
+    Lock();
+    [_requestMap removeObjectForKey:requestID];
+    Unlock();
 }
 
 #pragma mark - DataTask Creation Methods
