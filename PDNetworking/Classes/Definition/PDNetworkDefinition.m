@@ -8,7 +8,7 @@
 #import "PDNetworkDefinition.h"
 
 NSTimeInterval const PDNetworkRequestDefaultTimeoutInterval = 30.f;
-NSUInteger const PDNetworkRequestDefaultAutoRetryTimes = 3;
+NSUInteger const PDNetworkRequestDefaultAutoRetryTimes = 0;
 
 NSString *PDNetworkRequestGetMethodName(PDNetworkRequestMethod method) {
     switch (method) {
