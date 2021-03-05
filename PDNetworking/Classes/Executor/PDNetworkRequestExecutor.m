@@ -134,11 +134,6 @@
      */
     [self.request.sessionTask cancel];
     
-    [self lock];
-    self.request.sessionTask = nil;
-    self->_request = nil;
-    [self unlock];
-    
     // Notify request manager
     NSError *outError = [NSError errorWithDomain:@"PDNetworkDomain" code:-1000 userInfo:nil];
     !self.doneHandler ?: self.doneHandler(NO, outError);
