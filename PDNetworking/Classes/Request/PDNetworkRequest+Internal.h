@@ -10,8 +10,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class PDNetworkRequestVisitor;
-
 typedef NS_ENUM(NSUInteger, PDNetworkRequestType) {
     PDNetworkRequestTypeRegular   = 0,
     PDNetworkRequestTypeDownload  = 1,
