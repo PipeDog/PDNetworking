@@ -16,9 +16,6 @@
 #import "PDNetworkBuiltinCache.h"
 #import "PDNetworkDataUtil.h"
 #import "PDNetworkRequestExecutor.h"
-#import "PDNetworkRequestDownloadExecutor.h"
-#import "PDNetworkRequestUploadExecutor.h"
-#import "PDNetworkRequestRegularExecutor.h"
 
 #define Lock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
 #define Unlock() dispatch_semaphore_signal(self->_lock)
