@@ -1,13 +1,13 @@
 //
-//  PDNTCodecUUID.m
+//  PDNetworkUUID.m
 //  PDNetworking
 //
 //  Created by liang on 2021/3/4.
 //
 
-#import "PDNTCodecUUID.h"
+#import "PDNetworkUUID.h"
 
-@implementation PDNTCodecUUID
+@implementation PDNetworkUUID
 
 static NSUInteger counter = 0;
 

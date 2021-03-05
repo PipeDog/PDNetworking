@@ -43,12 +43,12 @@
         if (fileSize < contentLen) { return nil; }
         
         // Create intermediate dir path if needed
-        NSURL *fileURL = self.request.destination(targetPath.path, response);
+        NSURL *fileURL = self.request.destination(targetPath, response);
         BOOL isDir = NO; NSString *dirPath = [fileURL.path stringByDeletingLastPathComponent];
         BOOL dirExist = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
         
         if (!dirExist || !isDir) {
-            [[NSFileManager defaultManager] createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:nil]
+            [[NSFileManager defaultManager] createDirectoryAtPath:dirPath withIntermediateDirectories:YES attributes:nil error:nil];
         }
         
         return fileURL;

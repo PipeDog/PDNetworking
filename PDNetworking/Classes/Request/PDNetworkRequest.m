@@ -9,7 +9,7 @@
 #import "PDNetworkRequest.h"
 #import "PDNetworkRequest+Internal.h"
 #import "PDNetworkManager.h"
-#import "PDNTCodecUUID.h"
+#import "PDNetworkUUID.h"
 
 @implementation PDNetworkRequest {
     PDNetworkRequestID _requestID;
@@ -73,7 +73,7 @@
 
 - (PDNetworkRequestID)requestID {
     if (!_requestID) {
-        _requestID = [PDNTCodecUUID UUID].UUIDString;
+        _requestID = [PDNetworkUUID UUID].UUIDString;
     }
     return _requestID;
 }
