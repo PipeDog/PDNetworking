@@ -24,7 +24,7 @@
 
 #pragma mark - Private Methods
 - (void)_handleResponse:(id)responseObject error:(NSError *)error {
-    if (!error) {
+    if (!error || [self isCancelled]) {
         [self _notifyRequestWithFileURL:responseObject error:error];
         return;
     }

@@ -71,7 +71,7 @@
 }
 
 - (void)_handleResponse:(id)responseObject error:(NSError *)error {
-    if (!error) {
+    if (!error || [self isCancelled]) {
         [self _notifyRequestWithResponse:responseObject error:error];
         return;
     }

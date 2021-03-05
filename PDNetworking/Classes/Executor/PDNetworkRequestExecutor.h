@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)executeWithDoneHandler:(void (^)(BOOL success, NSError * _Nullable error))doneHandler;
 - (void)cancel;
+- (BOOL)isCancelled;
 
 #pragma mark - Internal Methods
 - (NSURLSessionTask *)sessionTask;

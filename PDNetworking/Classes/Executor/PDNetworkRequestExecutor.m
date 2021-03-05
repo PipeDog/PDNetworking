@@ -13,6 +13,7 @@
 
 @implementation PDNetworkRequestExecutor {
     dispatch_semaphore_t _lock;
+    BOOL _isCancelled;
 }
 
 + (Class)executorClassWithRequestType:(PDNetworkRequestType)requestType {
@@ -36,6 +37,7 @@
         _request = request;
         _sessionManager = sessionManager;
         _lock = dispatch_semaphore_create(1);
+        _isCancelled = NO;
         
         // Append full url
         NSString *fullUrl = _request.baseUrl;
@@ -119,6 +121,10 @@
 }
 
 - (void)cancel {
+    [self lock];
+    _isCancelled = YES;
+    [self unlock];
+    
     /* Notify request then unbind
      * -cancel returns immediately, but marks a task as being canceled.
      * The task will signal -URLSession:task:didCompleteWithError: with an
@@ -136,6 +142,13 @@
     // Notify request manager
     NSError *outError = [NSError errorWithDomain:@"PDNetworkDomain" code:-1000 userInfo:nil];
     !self.doneHandler ?: self.doneHandler(NO, outError);
+}
+
+- (BOOL)isCancelled {
+    [self lock];
+    BOOL isCancelled = _isCancelled;
+    [self unlock];
+    return isCancelled;
 }
 
 #pragma mark - Internal Methods
