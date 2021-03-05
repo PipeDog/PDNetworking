@@ -22,7 +22,7 @@ pod 'PDNetworking'
 
 ## Author
 
-liang, leiliang4@xdf.cn
+liang, 1007279249@qq.com
 
 ## License
 
