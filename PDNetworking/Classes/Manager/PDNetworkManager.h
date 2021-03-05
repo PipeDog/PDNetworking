@@ -20,10 +20,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) id<PDNetworkCache> networkCache;
 
 - (void)addRequest:(PDNetworkRequest *)request;
+- (void)cancelRequest:(PDNetworkRequest *)request;
 
 // If return YES, the request will be canceled
 - (void)cancelRequestsWithFilter:(BOOL (^)(PDNetworkRequest *request))filter;
-- (void)cancelRequest:(PDNetworkRequest *)request;
 - (void)cancelAllRequests;
 
 @end

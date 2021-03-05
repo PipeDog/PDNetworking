@@ -15,6 +15,12 @@
 
 @synthesize path = _path;
 
+- (instancetype)init {
+    NSString *cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *path = [cacheFolder stringByAppendingPathComponent:@"com.pd-network.cache"];
+    return [self initWithPath:path];
+}
+
 - (instancetype)initWithPath:(NSString *)path {
     NSAssert(path.length > 0, @"The argument `path` can not be nil!");
     if (!path.length) { return nil; }

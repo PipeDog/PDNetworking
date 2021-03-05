@@ -15,7 +15,9 @@
 #import "AFNetworking.h"
 #endif
 
-@implementation PDNetworkRequestExecutor
+@implementation PDNetworkRequestExecutor {
+    NSThread *_executeThread;
+}
 
 - (instancetype)initWithRequest:(PDNetworkRequest *)request
                  sessionManager:(AFHTTPSessionManager *)sessionManager {
@@ -96,30 +98,28 @@
 }
 
 - (void)executeWithDoneHandler:(void (^)(BOOL, NSError * _Nullable))doneHandler {
+    _executeThread = [NSThread currentThread];
+    
     self.doneHandler = [doneHandler copy];
     self.currentRetryTimes = 0;
     [self.request.sessionTask resume];
 }
 
 - (void)cancel {
-    dispatch_async(self.request.completionQueue ?: dispatch_get_main_queue(), ^{
-        self.currentRetryTimes = 0;
-        
-        /* Notify request then unbind
-         * -cancel returns immediately, but marks a task as being canceled.
-         * The task will signal -URLSession:task:didCompleteWithError: with an
-         * error value of { NSURLErrorDomain, NSURLErrorCancelled }.  In some
-         * cases, the task may signal other work before it acknowledges the
-         * cancelation.  -cancel may be sent to a task that has been suspended.
-         */
-        [self.request.sessionTask cancel];
-        self.request.sessionTask = nil;
-        self->_request = nil;
-        
-        // Notify request manager
-        NSError *outError = [NSError errorWithDomain:@"PDNetworkDomain" code:-1000 userInfo:nil];
-        !self.doneHandler ?: self.doneHandler(NO, outError);
-    });
+    /* Notify request then unbind
+     * -cancel returns immediately, but marks a task as being canceled.
+     * The task will signal -URLSession:task:didCompleteWithError: with an
+     * error value of { NSURLErrorDomain, NSURLErrorCancelled }.  In some
+     * cases, the task may signal other work before it acknowledges the
+     * cancelation.  -cancel may be sent to a task that has been suspended.
+     */
+    [self.request.sessionTask cancel];
+    self.request.sessionTask = nil;
+    self->_request = nil;
+    
+    // Notify request manager
+    NSError *outError = [NSError errorWithDomain:@"PDNetworkDomain" code:-1000 userInfo:nil];
+    !self.doneHandler ?: self.doneHandler(NO, outError);
 }
 
 #pragma mark - Internal Methods

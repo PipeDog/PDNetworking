@@ -61,10 +61,7 @@ static PDNetworkManager *__defaultManager;
         _requestMap = [NSMutableDictionary dictionary];
         _executorMap = [NSMutableDictionary dictionary];
         _sessionManager = [AFHTTPSessionManager manager];
-        
-        NSString *cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
-        NSString *path = [cacheFolder stringByAppendingPathComponent:@"com.pd-network.cache"];
-        _networkCache = [[PDNetworkDefaultCache alloc] initWithPath:path];
+        _networkCache = [[PDNetworkDefaultCache alloc] init];
 
         AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
         securityPolicy.allowInvalidCertificates = NO;
@@ -115,6 +112,16 @@ static PDNetworkManager *__defaultManager;
     }];
 }
 
+- (void)cancelRequest:(PDNetworkRequest *)request {
+    Lock();
+    PDNetworkRequestExecutor *executor = self.executorMap[request.requestID];
+    [self.requestMap removeObjectForKey:request.requestID];
+    [self.executorMap removeObjectForKey:request.requestID];
+    Unlock();
+    
+    [executor cancel];
+}
+
 - (void)cancelRequestsWithFilter:(BOOL (^)(PDNetworkRequest * _Nonnull))filter {
     NSAssert(filter, @"The argument `filter` can not be nil!");
     if (!filter) { return; }
@@ -125,16 +132,6 @@ static PDNetworkManager *__defaultManager;
             [obj cancel];
         }
     }];
-}
-
-- (void)cancelRequest:(PDNetworkRequest *)request {
-    Lock();
-    PDNetworkRequestExecutor *executor = self.executorMap[request.requestID];
-    [self.requestMap removeObjectForKey:request.requestID];
-    [self.executorMap removeObjectForKey:request.requestID];
-    Unlock();
-    
-    [executor cancel];
 }
 
 - (void)cancelAllRequests {
