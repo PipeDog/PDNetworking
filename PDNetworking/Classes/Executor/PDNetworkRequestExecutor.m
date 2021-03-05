@@ -111,7 +111,7 @@
 
 - (void)executeWithDoneHandler:(void (^)(BOOL, NSError * _Nullable))doneHandler {
     [self lock];
-    self.doneHandler = [doneHandler copy];
+    _doneHandler = [doneHandler copy];
     self.currentRetryTimes = 0;
     [self unlock];
 

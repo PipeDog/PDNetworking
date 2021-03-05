@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSURLRequest *URLRequest;
 @property (nonatomic, strong, readonly) AFHTTPRequestSerializer *requestSerializer;
 @property (nonatomic, strong, readonly) AFHTTPResponseSerializer *responseSerializer;
-@property (nonatomic, copy) void (^doneHandler)(BOOL, NSError *);
+@property (nonatomic, copy, readonly) void (^doneHandler)(BOOL, NSError *);
 @property (nonatomic, assign) NSUInteger currentRetryTimes;
 
 + (instancetype)new NS_UNAVAILABLE;
