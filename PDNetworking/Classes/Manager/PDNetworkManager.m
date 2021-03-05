@@ -144,9 +144,9 @@ static PDNetworkManager *__defaultManager;
 
 #pragma mark - Setter Methods
 - (void)setNetworkCache:(id<PDNetworkCache>)networkCache {
-    Lock();
-    _networkCache = networkCache;
-    Unlock();
+    @synchronized (self) {
+        _networkCache = networkCache;
+    }
 }
 
 @end
