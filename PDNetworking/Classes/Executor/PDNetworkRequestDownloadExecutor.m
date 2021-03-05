@@ -35,12 +35,18 @@
             contentLen = response.expectedContentLength;
         }
                 
-        if (contentLen <= 0) { return nil; }
+        if (contentLen <= 0) {
+            NSAssert(NO, @"Response header `Content-Length` is invalid!");
+            return nil;
+        }
         
         // 'fileSize' from local file info
         NSDictionary *fileInfo = [[NSFileManager defaultManager] attributesOfItemAtPath:targetPath.path error:NULL];
         long long fileSize = [fileInfo[NSFileSize] longLongValue];
-        if (fileSize < contentLen) { return nil; }
+        if (fileSize < contentLen) {
+            NSAssert(NO, @"Download error or file is corrupted!");
+            return nil;
+        }
         
         // Create intermediate dir path if needed
         NSURL *fileURL = self.request.destination(targetPath, response);
