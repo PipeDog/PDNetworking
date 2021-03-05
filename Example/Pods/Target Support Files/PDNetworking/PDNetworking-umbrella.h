@@ -11,7 +11,7 @@
 #endif
 
 #import "PDNetworkCache.h"
-#import "PDNetworkDefaultCache.h"
+#import "PDNetworkBuiltinCache.h"
 #import "PDNetworkDefinition.h"
 #import "PDNetworkResponse.h"
 #import "PDNetworkManager+Constructing.h"
@@ -28,7 +28,7 @@
 #import "PDNetworkResponse.h"
 #import "NSString+PDNetworking.h"
 #import "PDNetworkDataUtil.h"
-#import "PDNKCodecUUID.h"
+#import "PDNTCodecUUID.h"
 
 FOUNDATION_EXPORT double PDNetworkingVersionNumber;
 FOUNDATION_EXPORT const unsigned char PDNetworkingVersionString[];

@@ -10,7 +10,7 @@
 
 @implementation NSString (PDNetworking)
 
-- (NSString *)urlStringWithParameters:(NSDictionary *)parameters {
+- (NSString *)pdnt_urlStringWithParameters:(NSDictionary *)parameters {
     if (!parameters.allKeys.count) {
         return self;
     }
@@ -48,7 +48,7 @@
     }
 }
 
-- (NSString *)encodeWithURLQueryAllowedCharacterSet {
+- (NSString *)pdnt_encodeWithURLQueryAllowedCharacterSet {
     return [self stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
 }
 

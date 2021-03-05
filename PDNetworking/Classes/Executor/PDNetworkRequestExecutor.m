@@ -6,17 +6,22 @@
 //
 
 #import "PDNetworkRequestExecutor.h"
-#import "PDNetworkRequest.h"
 #import "NSString+PDNetworking.h"
-#import "PDNetworkRequest+Internal.h"
-#if __has_include(<AFNetworking/AFNetworking.h>)
-#import <AFNetworking/AFNetworking.h>
-#else
-#import "AFNetworking.h"
-#endif
+#import "PDNetworkRequestRegularExecutor.h"
+#import "PDNetworkRequestUploadExecutor.h"
+#import "PDNetworkRequestDownloadExecutor.h"
 
 @implementation PDNetworkRequestExecutor {
-    NSThread *_executeThread;
+    dispatch_semaphore_t _lock;
+}
+
++ (Class)executorClassWithRequestType:(PDNetworkRequestType)requestType {
+    switch (requestType) {
+        case PDNetworkRequestTypeRegular: return [PDNetworkRequestRegularExecutor class];
+        case PDNetworkRequestTypeUpload: return [PDNetworkRequestUploadExecutor class];
+        case PDNetworkRequestTypeDownload: return [PDNetworkRequestDownloadExecutor class];
+        default: return nil;
+    }
 }
 
 - (instancetype)initWithRequest:(PDNetworkRequest *)request
@@ -30,21 +35,21 @@
     if (self) {
         _request = request;
         _sessionManager = sessionManager;
+        _lock = dispatch_semaphore_create(1);
         
         // Append full url
-        NSString *url = _request.baseUrl;
+        NSString *fullUrl = _request.baseUrl;
         if (_request.urlPath.length > 0) {
-            url = [url stringByAppendingString:_request.urlPath];
+            fullUrl = [fullUrl stringByAppendingString:_request.urlPath];
         }
-        if (![NSURL URLWithString:url]) {
-            url = [url encodeWithURLQueryAllowedCharacterSet];
+        if (![NSURL URLWithString:fullUrl]) {
+            fullUrl = [fullUrl pdnt_encodeWithURLQueryAllowedCharacterSet];
         }
-        _fullRequestURL = url;
               
         // Create request cache id
-        NSString *requestCacheID = [_fullRequestURL copy];
-        requestCacheID = [requestCacheID urlStringWithParameters:_request.parameters];
-        _requestCacheID = [requestCacheID encodeWithURLQueryAllowedCharacterSet];
+        NSString *requestCacheID = [fullUrl copy];
+        requestCacheID = [requestCacheID pdnt_urlStringWithParameters:_request.parameters];
+        _requestCacheID = [requestCacheID pdnt_encodeWithURLQueryAllowedCharacterSet];
         
         // Request serializer
         AFHTTPRequestSerializer *requestSerializer = [AFHTTPRequestSerializer serializer];
@@ -74,34 +79,42 @@
         NSString *method = PDNetworkRequestGetMethodName(request.requestMethod);
         NSDictionary *parameters = _request.parameters;
         
-        switch (_request.actionType) {
-            case PDNetworkRequestActionRegular: {
-                _URLRequest = [requestSerializer requestWithMethod:method URLString:url parameters:parameters error:&outError];
+        switch (_request.requestType) {
+            case PDNetworkRequestTypeRegular: {
+                _URLRequest = [requestSerializer requestWithMethod:method URLString:fullUrl parameters:parameters error:&outError];
             } break;
-            case PDNetworkRequestActionDownload: {
-                _URLRequest = [requestSerializer requestWithMethod:method URLString:url parameters:parameters error:&outError];
+            case PDNetworkRequestTypeDownload: {
+                _URLRequest = [requestSerializer requestWithMethod:method URLString:fullUrl parameters:parameters error:&outError];
             } break;
-            case PDNetworkRequestActionUpload: {
+            case PDNetworkRequestTypeUpload: {
                 void (^constructingBody)(id<AFMultipartFormData>) = (void (^)(id<AFMultipartFormData>))request.constructingBody;
-                _URLRequest = [requestSerializer multipartFormRequestWithMethod:method URLString:url parameters:parameters constructingBodyWithBlock:constructingBody error:&outError];
+                _URLRequest = [requestSerializer multipartFormRequestWithMethod:method URLString:fullUrl parameters:parameters constructingBodyWithBlock:constructingBody error:&outError];
             } break;
             default: break;
         }
 
-        NSAssert(_URLRequest || !outError, @"Build `URLRequest` failed!");
+        if (!_URLRequest || outError) {
+            NSAssert(_URLRequest || !outError, @"Build `URLRequest` failed!");
+            return nil;
+        }
         
         // Bind request with sessionTask
         _request.sessionTask = [self sessionTask];
-        NSAssert(_request.sessionTask, @"Create `sessionTask` failed!");
+        
+        if (!_request.sessionTask) {
+            NSAssert(_request.sessionTask, @"Create `sessionTask` failed!");
+            return nil;
+        }
     }
     return self;
 }
 
 - (void)executeWithDoneHandler:(void (^)(BOOL, NSError * _Nullable))doneHandler {
-    _executeThread = [NSThread currentThread];
-    
+    [self lock];
     self.doneHandler = [doneHandler copy];
     self.currentRetryTimes = 0;
+    [self unlock];
+
     [self.request.sessionTask resume];
 }
 
@@ -114,8 +127,11 @@
      * cancelation.  -cancel may be sent to a task that has been suspended.
      */
     [self.request.sessionTask cancel];
+    
+    [self lock];
     self.request.sessionTask = nil;
     self->_request = nil;
+    [self unlock];
     
     // Notify request manager
     NSError *outError = [NSError errorWithDomain:@"PDNetworkDomain" code:-1000 userInfo:nil];
@@ -137,6 +153,14 @@
     id data = [self.responseSerializer responseObjectForResponse:response data:responseData error:outError];
     NSAssert(data || !(*outError), @"Parse data failed!");
     return data;
+}
+
+- (void)lock {
+    dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER);
+}
+
+- (void)unlock {
+    dispatch_semaphore_signal(self->_lock);
 }
 
 @end

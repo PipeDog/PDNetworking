@@ -12,16 +12,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class PDNetworkRequestVisitor;
 
-typedef NS_ENUM(NSUInteger, PDNetworkRequestActionType) {
-    PDNetworkRequestActionRegular   = 0,
-    PDNetworkRequestActionDownload  = 1,
-    PDNetworkRequestActionUpload    = 2,
+typedef NS_ENUM(NSUInteger, PDNetworkRequestType) {
+    PDNetworkRequestTypeRegular   = 0,
+    PDNetworkRequestTypeDownload  = 1,
+    PDNetworkRequestTypeUpload    = 2,
 };
 
 @interface PDNetworkRequest ()
 
 @property (nonatomic, strong, nullable) NSURLSessionTask *sessionTask;
-@property (nonatomic, assign) PDNetworkRequestActionType actionType;
+@property (nonatomic, assign) PDNetworkRequestType requestType;
 
 @property (nonatomic, copy, nullable) void (^success)(id<PDNetworkResponse>);
 @property (nonatomic, copy, nullable) void (^failure)(id<PDNetworkResponse>);

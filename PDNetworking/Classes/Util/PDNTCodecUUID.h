@@ -1,5 +1,5 @@
 //
-//  PDNKCodecUUID.h
+//  PDNTCodecUUID.h
 //  PDNetworking
 //
 //  Created by liang on 2021/3/4.
@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface PDNKCodecUUID : NSObject
+@interface PDNTCodecUUID : NSObject
 
 @property (readonly, copy) NSString *UUIDString;
 

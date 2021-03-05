@@ -7,7 +7,7 @@
 
 #import "PDNetworkDataUtil.h"
 
-id PDNKValueToJSONObject(id value) {
+id PDNTValueToJSONObject(id value) {
     if (!value || [value isKindOfClass:[NSNull class]]) {
         return nil;
     }
@@ -39,7 +39,7 @@ id PDNKValueToJSONObject(id value) {
     return nil;
 }
 
-NSData *PDNKValueToData(id value) {
+NSData *PDNTValueToData(id value) {
     if (!value || [value isKindOfClass:[NSNull class]]) {
         return nil;
     }
@@ -65,8 +65,8 @@ NSData *PDNKValueToData(id value) {
     return nil;
 }
 
-NSString *PDNKValueToJSONText(id value) {
-    NSData *JSONData = PDNKValueToData(value);
+NSString *PDNTValueToJSONText(id value) {
+    NSData *JSONData = PDNTValueToData(value);
     NSString *JSONText = JSONData ? [[NSString alloc] initWithData:JSONData encoding:NSUTF8StringEncoding] : nil;
     return JSONText;
 }

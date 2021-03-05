@@ -6,17 +6,23 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "PDNetworkResponse.h"
+#import "PDNetworkDataUtil.h"
+#import "PDNetworkRequest+Internal.h"
+#import "PDNetworkPluginManager.h"
+
+#if __has_include(<AFNetworking/AFNetworking.h>)
+#import <AFNetworking/AFNetworking.h>
+#else
+#import "AFNetworking.h"
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
-
-@class PDNetworkRequest;
-@class AFHTTPRequestSerializer, AFHTTPResponseSerializer, AFHTTPSessionManager;
 
 @interface PDNetworkRequestExecutor : NSObject
 
 @property (nonatomic, weak, readonly) PDNetworkRequest *request;
 @property (nonatomic, weak, readonly) AFHTTPSessionManager *sessionManager;
-@property (nonatomic, copy, readonly) NSString *fullRequestURL;
 @property (nonatomic, copy, readonly) NSString *requestCacheID;
 @property (nonatomic, strong, readonly) NSURLRequest *URLRequest;
 @property (nonatomic, strong, readonly) AFHTTPRequestSerializer *requestSerializer;
@@ -28,6 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 
 #pragma mark - External Methods
++ (Class _Nullable)executorClassWithRequestType:(PDNetworkRequestType)requestType;
+
 - (instancetype _Nullable)initWithRequest:(PDNetworkRequest *)request
                            sessionManager:(AFHTTPSessionManager *)sessionManager NS_DESIGNATED_INITIALIZER;
 
@@ -37,6 +45,9 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Internal Methods
 - (NSURLSessionTask *)sessionTask;
 - (id)parseResponseData:(id _Nullable)responseData outError:(NSError ** _Nullable)outError;
+
+- (void)lock;
+- (void)unlock;
 
 @end
 

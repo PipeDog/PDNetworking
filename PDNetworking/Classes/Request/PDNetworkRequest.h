@@ -34,7 +34,7 @@ typedef NSString * PDNetworkRequestID;
 @property (nonatomic, assign) NSTimeInterval timeoutInterval; // Default is 30s.
 @property (nonatomic, assign) NSUInteger autoRetryTimes; // Default is 3.
 @property (nonatomic, strong, nullable) dispatch_queue_t completionQueue; // Default is main queue.
-@property (nonatomic, copy, nullable) __kindof NSURLSessionTask * _Nonnull (^customSessionTask)(void); // All the other constructing properties are ignored if the `customSessionTask` is not nil, and need to manage PDNetworkRequest instance memory by yourself.
+@property (nonatomic, copy, nullable) __kindof NSURLSessionTask *(^customSessionTask)(void); // All the other constructing properties are ignored if the `customSessionTask` is not nil, and need to manage PDNetworkRequest instance memory by yourself.
 @property (nonatomic, readonly, getter=isExecuting) BOOL executing;
 
 - (instancetype)sendWithSuccess:(void (^ __nullable)(id<PDNetworkResponse> response))success

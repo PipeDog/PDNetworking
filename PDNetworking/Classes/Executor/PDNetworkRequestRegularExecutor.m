@@ -6,17 +6,7 @@
 //
 
 #import "PDNetworkRequestRegularExecutor.h"
-#import "PDNetworkResponse.h"
-#import "PDNetworkDataUtil.h"
-#import "PDNetworkRequest+Internal.h"
-#import "PDNetworkPluginManager.h"
 #import "PDNetworkManager.h"
-
-#if __has_include(<AFNetworking/AFNetworking.h>)
-#import <AFNetworking/AFNetworking.h>
-#else
-#import "AFNetworking.h"
-#endif
 
 @interface PDNetworkRequestRegularExecutor ()
 
@@ -86,9 +76,15 @@
         return;
     }
     
-    // Retry if needed
-    if (self.currentRetryTimes < self.request.autoRetryTimes) {
+    [self lock];
+    NSUInteger currentRetryTimes = self.currentRetryTimes;
+    [self unlock];
+    
+    if (currentRetryTimes < self.request.autoRetryTimes) {
+        [self lock];
         self.currentRetryTimes += 1;
+        [self unlock];
+        
         [self.request.sessionTask resume];
         return;
     }
@@ -100,7 +96,7 @@
     dispatch_async(self.request.completionQueue ?: dispatch_get_main_queue(), ^{
         id<PDNetworkResponse> response = [[PDNetworkResponse alloc] init];
         response.URLResponse = self.request.sessionTask.response;
-        response.data = PDNKValueToJSONObject(responseObject);
+        response.data = PDNTValueToJSONObject(responseObject);
         response.error = error;
         [[PDNetworkPluginManager defaultManager] requestDidFinishLoad:self.request withResponse:response];
         

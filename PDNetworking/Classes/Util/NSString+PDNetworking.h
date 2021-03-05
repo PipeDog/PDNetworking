@@ -12,8 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSString (PDNetworking)
 
-- (NSString *)urlStringWithParameters:(NSDictionary *)parameters;
-- (NSString *)encodeWithURLQueryAllowedCharacterSet;
+- (NSString *)pdnt_urlStringWithParameters:(NSDictionary *)parameters;
+- (NSString *)pdnt_encodeWithURLQueryAllowedCharacterSet;
 
 @end
 

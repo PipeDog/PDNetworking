@@ -13,7 +13,7 @@
 #import "PDNetworkRequest+Internal.h"
 #import "PDNetworkPluginManager.h"
 #import "PDNetworkResponse.h"
-#import "PDNetworkDefaultCache.h"
+#import "PDNetworkBuiltinCache.h"
 #import "PDNetworkDataUtil.h"
 #import "PDNetworkRequestExecutor.h"
 #import "PDNetworkRequestDownloadExecutor.h"
@@ -61,7 +61,7 @@ static PDNetworkManager *__defaultManager;
         _requestMap = [NSMutableDictionary dictionary];
         _executorMap = [NSMutableDictionary dictionary];
         _sessionManager = [AFHTTPSessionManager manager];
-        _networkCache = [[PDNetworkDefaultCache alloc] init];
+        _networkCache = [[PDNetworkBuiltinCache alloc] init];
 
         AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
         securityPolicy.allowInvalidCertificates = NO;
@@ -93,7 +93,8 @@ static PDNetworkManager *__defaultManager;
     
     if (executor) { [executor cancel]; }
     
-    executor = [self executorForRequest:request];
+    Class executorClass = [PDNetworkRequestExecutor executorClassWithRequestType:request.requestType];
+    executor = [[executorClass alloc] initWithRequest:request sessionManager:self.sessionManager];
     if (!executor) { return; }
     
     Lock();
@@ -139,19 +140,6 @@ static PDNetworkManager *__defaultManager;
     [requests enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
         [obj cancel];
     }];
-}
-
-#pragma mark - Private Methods
-- (PDNetworkRequestExecutor *)executorForRequest:(PDNetworkRequest *)request {
-    Class executorClass = nil;
-    
-    switch (request.actionType) {
-        case PDNetworkRequestActionRegular: executorClass = [PDNetworkRequestRegularExecutor class]; break;
-        case PDNetworkRequestActionUpload: executorClass = [PDNetworkRequestUploadExecutor class]; break;
-        case PDNetworkRequestActionDownload: executorClass = [PDNetworkRequestDownloadExecutor class]; break;
-    }
-    
-    return [[executorClass alloc] initWithRequest:request sessionManager:self.sessionManager];
 }
 
 #pragma mark - Setter Methods

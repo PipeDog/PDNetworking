@@ -9,8 +9,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-FOUNDATION_EXTERN id _Nullable PDNKValueToJSONObject(id value);
-FOUNDATION_EXTERN NSData * _Nullable PDNKValueToData(id value);
-FOUNDATION_EXTERN NSString * _Nullable PDNKValueToJSONText(id value);
+FOUNDATION_EXTERN id _Nullable PDNTValueToJSONObject(id value);
+FOUNDATION_EXTERN NSData * _Nullable PDNTValueToData(id value);
+FOUNDATION_EXTERN NSString * _Nullable PDNTValueToJSONText(id value);
 
 NS_ASSUME_NONNULL_END

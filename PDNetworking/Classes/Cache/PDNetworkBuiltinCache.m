@@ -1,15 +1,15 @@
 //
-//  PDNetworkDefaultCache.m
+//  PDNetworkBuiltinCache.m
 //  PDNetworking
 //
 //  Created by liang on 2021/3/4.
 //
 
-#import "PDNetworkDefaultCache.h"
+#import "PDNetworkBuiltinCache.h"
 #import "YYDiskCache.h"
 #import "PDNetworkDataUtil.h"
 
-@implementation PDNetworkDefaultCache {
+@implementation PDNetworkBuiltinCache {
     YYDiskCache *_diskCache;
 }
 
@@ -40,11 +40,11 @@
     _diskCache = [[YYDiskCache alloc] initWithPath:_path];
     
     _diskCache.customArchiveBlock = ^NSData * _Nonnull(id  _Nonnull object) {
-        return PDNKValueToData(object);
+        return PDNTValueToData(object);
     };
     
     _diskCache.customUnarchiveBlock = ^id _Nonnull(NSData * _Nonnull data) {
-        return PDNKValueToJSONObject(data);
+        return PDNTValueToJSONObject(data);
     };
 }
 

@@ -1,5 +1,5 @@
 //
-//  PDNetworkDefaultCache.h
+//  PDNetworkBuiltinCache.h
 //  PDNetworking
 //
 //  Created by liang on 2021/3/4.
@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface PDNetworkDefaultCache : NSObject <PDNetworkCache>
+@interface PDNetworkBuiltinCache : NSObject <PDNetworkCache>
 
 @property (nonatomic, copy, readonly) NSString *path;
 

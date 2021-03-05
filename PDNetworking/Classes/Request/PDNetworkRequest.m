@@ -9,7 +9,7 @@
 #import "PDNetworkRequest.h"
 #import "PDNetworkRequest+Internal.h"
 #import "PDNetworkManager.h"
-#import "PDNKCodecUUID.h"
+#import "PDNTCodecUUID.h"
 
 @implementation PDNetworkRequest {
     PDNetworkRequestID _requestID;
@@ -32,7 +32,7 @@
 #pragma mark - Public Methods
 - (instancetype)sendWithSuccess:(void (^)(id<PDNetworkResponse> _Nonnull))success
                         failure:(void (^)(id<PDNetworkResponse> _Nonnull))failure {
-    self.actionType = PDNetworkRequestActionRegular;
+    self.requestType = PDNetworkRequestTypeRegular;
     self.success = success;
     self.failure = failure;
     [[PDNetworkManager defaultManager] addRequest:self];
@@ -45,7 +45,7 @@
                              failure:(void (^)(id<PDNetworkDownloadResponse> _Nonnull))failure {
     NSAssert(destination != nil, @"The block `destination` can not be nil!");
     
-    self.actionType = PDNetworkRequestActionDownload;
+    self.requestType = PDNetworkRequestTypeDownload;
     self.downloadProgress = downloadProgressBlock;
     self.destination = destination;
     self.downloadSuccess = success;
@@ -58,7 +58,7 @@
                                   progress:(void (^)(NSProgress * _Nonnull))uploadProgress
                                    success:(void (^)(id<PDNetworkUploadResponse> _Nonnull))success
                                    failure:(void (^)(id<PDNetworkUploadResponse> _Nonnull))failure {
-    self.actionType = PDNetworkRequestActionUpload;
+    self.requestType = PDNetworkRequestTypeUpload;
     self.constructingBody = block;
     self.uploadProgress = uploadProgress;
     self.uploadSuccess = success;
@@ -73,7 +73,7 @@
 
 - (PDNetworkRequestID)requestID {
     if (!_requestID) {
-        _requestID = [PDNKCodecUUID UUID].UUIDString;
+        _requestID = [PDNTCodecUUID UUID].UUIDString;
     }
     return _requestID;
 }

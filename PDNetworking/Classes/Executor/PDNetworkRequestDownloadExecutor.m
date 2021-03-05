@@ -6,16 +6,6 @@
 //
 
 #import "PDNetworkRequestDownloadExecutor.h"
-#import "PDNetworkRequest+Internal.h"
-#import "PDNetworkPluginManager.h"
-#import "PDNetworkResponse.h"
-#import "PDNetworkDataUtil.h"
-
-#if __has_include(<AFNetworking/AFNetworking.h>)
-#import <AFNetworking/AFNetworking.h>
-#else
-#import "AFNetworking.h"
-#endif
 
 @implementation PDNetworkRequestDownloadExecutor
 
@@ -39,9 +29,15 @@
         return;
     }
     
-    // Retry if needed
-    if (self.currentRetryTimes < self.request.autoRetryTimes) {
+    [self lock];
+    NSUInteger currentRetryTimes = self.currentRetryTimes;
+    [self unlock];
+
+    if (currentRetryTimes < self.request.autoRetryTimes) {
+        [self lock];
         self.currentRetryTimes += 1;
+        [self unlock];
+        
         [self.request.sessionTask resume];
         return;
     }
