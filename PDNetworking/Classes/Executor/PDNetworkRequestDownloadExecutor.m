@@ -16,38 +16,6 @@
             !self.request.downloadProgress ?: self.request.downloadProgress(downloadProgress);
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        // Get 'Content-Length' from response header
-        long long contentLen = -1;
-        
-        if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-            NSHTTPURLResponse *HTTPResp = (NSHTTPURLResponse *)response;
-            if (HTTPResp.statusCode >= 300 && HTTPResp.statusCode < 600) {
-                return nil;
-            }
-
-            NSString *contentLenText = HTTPResp.allHeaderFields[@"Content-Length"];
-            contentLen = [contentLenText longLongValue];
-        }
-
-        if (contentLen <= 0) {
-            // Maybe `expectedContentLength` value is `-1`, if the resource type is zip, should set "Accept-Encoding" to request header
-            // https://stackoverflow.com/questions/11136020/response-expectedcontentlength-return-1
-            contentLen = response.expectedContentLength;
-        }
-                
-        if (contentLen <= 0) {
-            NSAssert(NO, @"Response header `Content-Length` is invalid!");
-            return nil;
-        }
-        
-        // 'fileSize' from local file info
-        NSDictionary *fileInfo = [[NSFileManager defaultManager] attributesOfItemAtPath:targetPath.path error:NULL];
-        long long fileSize = [fileInfo[NSFileSize] longLongValue];
-        if (fileSize < contentLen) {
-            NSAssert(NO, @"Download error or file is corrupted!");
-            return nil;
-        }
-        
         // Create intermediate dir path if needed
         NSURL *fileURL = self.request.destination(targetPath, response);
         BOOL isDir = NO; NSString *dirPath = [fileURL.path stringByDeletingLastPathComponent];
