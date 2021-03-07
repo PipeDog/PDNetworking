@@ -12,7 +12,7 @@
 #import "PDNetworkRequestDownloadExecutor.h"
 
 @implementation PDNetworkRequestExecutor {
-    dispatch_semaphore_t _lock;
+    NSRecursiveLock *_lock;
     BOOL _isCancelled;
 }
 
@@ -36,7 +36,7 @@
     if (self) {
         _request = request;
         _sessionManager = sessionManager;
-        _lock = dispatch_semaphore_create(1);
+        _lock = [[NSRecursiveLock alloc] init];
         _isCancelled = NO;
         
         // Append full url
@@ -164,11 +164,11 @@
 }
 
 - (void)lock {
-    dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER);
+    [self->_lock lock];
 }
 
 - (void)unlock {
-    dispatch_semaphore_signal(self->_lock);
+    [self->_lock unlock];
 }
 
 @end
