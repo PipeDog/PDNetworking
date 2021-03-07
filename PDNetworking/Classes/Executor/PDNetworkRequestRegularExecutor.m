@@ -27,16 +27,16 @@
         PDNetworkRequestCachePolicy cachePolicy = self.request.cachePolicy;
         
         if (cachePolicy == PDNetworkRequestReturnCacheDataThenLoad) {
-            if ((cachedData = [_cache objectForKey:self.requestCacheID])) {
+            if ((cachedData = [self _cachedData])) {
                 [self _notifyRequestWithCachedData:cachedData];
             }
         } else if (cachePolicy == PDNetworkRequestReturnCacheDataElseLoad) {
-            if ((cachedData = [_cache objectForKey:self.requestCacheID])) {
+            if ((cachedData = [self _cachedData])) {
                 [self _notifyRequestWithCachedData:cachedData];
                 continueRequesting = NO;
             }
         } else if (cachePolicy == PDNetworkRequestReturnCacheDataDontLoad) {
-            [self _notifyRequestWithCachedData:(cachedData = [_cache objectForKey:self.requestCacheID])];
+            [self _notifyRequestWithCachedData:(cachedData = [self _cachedData])];
             continueRequesting = NO;
         } else {
             // Do nothing...
@@ -61,6 +61,19 @@
 }
 
 #pragma mark - Private Methods
+- (id)_cachedData {
+    __block id cachedData = nil;
+    dispatch_semaphore_t lock = dispatch_semaphore_create(0);
+    
+    [_cache objectForKey:self.requestCacheID withBlock:^(NSString * _Nonnull key, id  _Nullable object) {
+        cachedData = object;
+        dispatch_semaphore_signal(lock);
+    }];
+    
+    dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);
+    return cachedData;
+}
+
 - (void)_notifyRequestWithCachedData:(id)data {
     id<PDNetworkResponse> response = [[PDNetworkResponse alloc] init];
     response.data = data;

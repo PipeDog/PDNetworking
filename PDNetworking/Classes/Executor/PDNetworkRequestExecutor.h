@@ -21,9 +21,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PDNetworkRequestExecutor : NSObject
 
-@property (nonatomic, weak, readonly) PDNetworkRequest *request;
-@property (nonatomic, weak, readonly) AFHTTPSessionManager *sessionManager;
-@property (nonatomic, copy, readonly) NSString *requestCacheID;
+@property (nonatomic, strong, readonly) PDNetworkRequest *request;
+@property (nonatomic, strong, readonly) AFHTTPSessionManager *sessionManager;
+@property (nonatomic, strong, readonly) NSString *requestCacheID;
 @property (nonatomic, strong, readonly) NSURLRequest *URLRequest;
 @property (nonatomic, strong, readonly) AFHTTPRequestSerializer *requestSerializer;
 @property (nonatomic, strong, readonly) AFHTTPResponseSerializer *responseSerializer;
