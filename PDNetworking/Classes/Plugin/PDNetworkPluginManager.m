@@ -75,7 +75,9 @@ static PDNetworkPluginManager *__defaultManager;
     
     // sort by priority
     [plugins sortUsingComparator:^NSComparisonResult(id<PDNetworkPlugin> obj1, id<PDNetworkPlugin> obj2) {
-        return obj1.priority < obj2.priority ? NSOrderedDescending : NSOrderedAscending;
+        NSInteger priority1 = [obj1 respondsToSelector:@selector(priority)] ? obj1.priority : 0;
+        NSInteger priority2 = [obj2 respondsToSelector:@selector(priority)] ? obj2.priority : 0;
+        return priority1 < priority2 ? NSOrderedDescending : NSOrderedAscending;
     }];
     
     _plugins = [plugins copy];
