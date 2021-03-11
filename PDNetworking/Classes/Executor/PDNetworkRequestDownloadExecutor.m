@@ -27,7 +27,9 @@
         
         return fileURL;
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+        [self lock];
         [self _handleResponse:filePath error:error];
+        [self unlock];
     }];;
 }
 
@@ -38,15 +40,8 @@
         return;
     }
     
-    [self lock];
-    NSUInteger currentRetryTimes = self.currentRetryTimes;
-    [self unlock];
-
-    if (currentRetryTimes < self.request.autoRetryTimes) {
-        [self lock];
-        self.currentRetryTimes += 1;
-        [self unlock];
-        
+    if (self.currentRetryTimes < self.request.autoRetryTimes) {
+        self.currentRetryTimes += 1;        
         [self.request.sessionTask resume];
         return;
     }
@@ -68,6 +63,7 @@
             !self.request.downloadFailure ?: self.request.downloadFailure(response);
         }
         
+        [self.request removeRequestBlocks];
         !self.doneHandler ?: self.doneHandler(!!(fileURL && !error), error);
     });
 }

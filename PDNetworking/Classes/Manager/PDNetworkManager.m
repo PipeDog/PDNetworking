@@ -128,11 +128,10 @@ static PDNetworkManager *__defaultManager;
     
     [[PDNetworkPluginManager defaultManager] requestWillStartLoad:request];
     
-    __weak typeof(self) weakSelf = self;
     [executor executeWithDoneHandler:^(BOOL success, NSError * _Nullable error) {
         Lock();
-        [weakSelf.requestMap removeObjectForKey:request.requestID];
-        [weakSelf.executorMap removeObjectForKey:request.requestID];
+        [self.requestMap removeObjectForKey:request.requestID];
+        [self.executorMap removeObjectForKey:request.requestID];
         Unlock();
     }];
 }

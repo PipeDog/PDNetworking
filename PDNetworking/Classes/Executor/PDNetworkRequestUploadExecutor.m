@@ -15,8 +15,10 @@
                                      uploadProgress:self.request.uploadProgress
                                    downloadProgress:nil
                                   completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+        [self lock];
         id parsedData = [self parseResponseData:responseObject outError:nil];
         [self _handleResponse:parsedData error:error];
+        [self unlock];
     }];
 }
 
@@ -27,15 +29,8 @@
         return;
     }
     
-    [self lock];
-    NSUInteger currentRetryTimes = self.currentRetryTimes;
-    [self unlock];
-
-    if (currentRetryTimes < self.request.autoRetryTimes) {
-        [self lock];
+    if (self.currentRetryTimes < self.request.autoRetryTimes) {
         self.currentRetryTimes += 1;
-        [self unlock];
-        
         [self.request.sessionTask resume];
         return;
     }
@@ -57,6 +52,7 @@
             !self.request.uploadFailure ?: self.request.uploadFailure(response);
         }
         
+        [self.request removeRequestBlocks];
         !self.doneHandler ?: self.doneHandler(!!(responseObject && !error), error);
     });
 }
