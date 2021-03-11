@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXPORT NSTimeInterval const PDNetworkRequestDefaultTimeoutInterval;
 FOUNDATION_EXPORT NSUInteger const PDNetworkRequestDefaultAutoRetryTimes;
+FOUNDATION_EXPORT NSUInteger const PDNetworkDefaultMaxConcurrentRequestCount;
 
 typedef NS_ENUM(NSUInteger, PDNetworkRequestMethod) {
     PDNetworkRequestMethodGET     = 0,

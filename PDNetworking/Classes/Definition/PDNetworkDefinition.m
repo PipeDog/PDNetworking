@@ -9,6 +9,7 @@
 
 NSTimeInterval const PDNetworkRequestDefaultTimeoutInterval = 30.f;
 NSUInteger const PDNetworkRequestDefaultAutoRetryTimes = 0;
+NSUInteger const PDNetworkDefaultMaxConcurrentRequestCount = 3;
 
 NSString *PDNetworkRequestGetMethodName(PDNetworkRequestMethod method) {
     switch (method) {

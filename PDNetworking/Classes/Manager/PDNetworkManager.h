@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, strong, readonly) PDNetworkManager *defaultManager;
 
 @property (nonatomic, strong) id<PDNetworkCache> networkCache;
+@property (nonatomic, assign) NSUInteger maxConcurrentRequestCount;
 
 - (void)addRequest:(PDNetworkRequest *)request;
 - (void)cancelRequest:(PDNetworkRequest *)request;

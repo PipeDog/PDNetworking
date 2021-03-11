@@ -16,14 +16,12 @@
 #import "PDNetworkBuiltinCache.h"
 #import "PDNetworkDataUtil.h"
 #import "PDNetworkRequestExecutor.h"
-
-#define Lock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
-#define Unlock() dispatch_semaphore_signal(self->_lock)
+#import <pthread/pthread.h>
 
 @interface PDNetworkManager ()
 
-@property (nonatomic, strong) dispatch_semaphore_t lock;
-@property (nonatomic, strong) dispatch_queue_t executeQueue;
+@property (nonatomic, assign) pthread_rwlock_t lock;
+@property (nonatomic, strong) NSOperationQueue *operationQueue;
 @property (nonatomic, strong) NSMutableDictionary<PDNetworkRequestID, PDNetworkRequest *> *requestMap;
 @property (nonatomic, strong) NSMutableDictionary<PDNetworkRequestID, PDNetworkRequestExecutor *> *executorMap;
 
@@ -52,48 +50,54 @@ static PDNetworkManager *__defaultManager;
     return __defaultManager;
 }
 
+- (void)dealloc {
+    pthread_rwlock_destroy(&_lock);
+}
+
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _lock = dispatch_semaphore_create(1);
-        _executeQueue = dispatch_queue_create("com.pd-networking.queue", DISPATCH_QUEUE_CONCURRENT);
+        pthread_rwlock_init(&_lock, NULL);
+        _operationQueue = [[NSOperationQueue alloc] init];
         _requestMap = [NSMutableDictionary dictionary];
         _executorMap = [NSMutableDictionary dictionary];
         _sessionManager = [AFHTTPSessionManager manager];
         _networkCache = [[PDNetworkBuiltinCache alloc] init];
+        _maxConcurrentRequestCount = PDNetworkDefaultMaxConcurrentRequestCount;
 
         AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
         securityPolicy.allowInvalidCertificates = NO;
         securityPolicy.validatesDomainName = NO;
         _sessionManager.securityPolicy = securityPolicy;
         _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
+        _operationQueue.maxConcurrentOperationCount = _maxConcurrentRequestCount;
     }
     return self;
 }
 
 #pragma mark - Public Methods
 - (void)addRequest:(PDNetworkRequest *)request {
-    dispatch_async(self.executeQueue, ^{
+    [self.operationQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
         [self _addRequest:request];
-    });
+    }]];
 }
 
 - (void)cancelRequest:(PDNetworkRequest *)request {
-    dispatch_async(self.executeQueue, ^{
+    [self.operationQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
         [self _cancelRequest:request];
-    });
+    }]];
 }
 
 - (void)cancelRequestsWithFilter:(BOOL (^)(PDNetworkRequest * _Nonnull))filter {
-    dispatch_async(self.executeQueue, ^{
+    [self.operationQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
         [self _cancelRequestsWithFilter:filter];
-    });
+    }]];
 }
 
 - (void)cancelAllRequests {
-    dispatch_async(self.executeQueue, ^{
+    [self.operationQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
         [self _cancelAllRequests];
-    });
+    }]];
 }
 
 #pragma mark - Private Methods
@@ -111,9 +115,9 @@ static PDNetworkManager *__defaultManager;
         return;
     }
     
-    Lock();
+    pthread_rwlock_rdlock(&_lock);
     PDNetworkRequestExecutor *executor = self.executorMap[request.requestID];
-    Unlock();
+    pthread_rwlock_unlock(&_lock);
     
     if (executor) { [executor cancel]; }
     
@@ -121,27 +125,27 @@ static PDNetworkManager *__defaultManager;
     executor = [[executorClass alloc] initWithRequest:request sessionManager:self.sessionManager];
     if (!executor) { return; }
     
-    Lock();
+    pthread_rwlock_wrlock(&_lock);
     self.requestMap[request.requestID] = request;
     self.executorMap[request.requestID] = executor;
-    Unlock();
+    pthread_rwlock_unlock(&_lock);
     
     [[PDNetworkPluginManager defaultManager] requestWillStartLoad:request];
     
     [executor executeWithDoneHandler:^(BOOL success, NSError * _Nullable error) {
-        Lock();
+        pthread_rwlock_wrlock(&(self->_lock));
         [self.requestMap removeObjectForKey:request.requestID];
         [self.executorMap removeObjectForKey:request.requestID];
-        Unlock();
+        pthread_rwlock_unlock(&(self->_lock));
     }];
 }
 
 - (void)_cancelRequest:(PDNetworkRequest *)request {
-    Lock();
+    pthread_rwlock_wrlock(&_lock);
     PDNetworkRequestExecutor *executor = self.executorMap[request.requestID];
     [self.requestMap removeObjectForKey:request.requestID];
     [self.executorMap removeObjectForKey:request.requestID];
-    Unlock();
+    pthread_rwlock_unlock(&_lock);
     
     [executor cancel];
 }
@@ -150,7 +154,10 @@ static PDNetworkManager *__defaultManager;
     NSAssert(filter, @"The argument `filter` can not be nil!");
     if (!filter) { return; }
     
+    pthread_rwlock_rdlock(&_lock);
     NSDictionary<NSString *, PDNetworkRequest *> *requestMap = [_requestMap copy];
+    pthread_rwlock_unlock(&_lock);
+    
     [requestMap enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
         if (filter(obj)) {
             [obj cancel];
@@ -159,7 +166,10 @@ static PDNetworkManager *__defaultManager;
 }
 
 - (void)_cancelAllRequests {
+    pthread_rwlock_rdlock(&_lock);
     NSDictionary<NSString *, PDNetworkRequest *> *requests = [_requestMap copy];
+    pthread_rwlock_unlock(&_lock);
+    
     [requests enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, PDNetworkRequest * _Nonnull obj, BOOL * _Nonnull stop) {
         [obj cancel];
     }];
@@ -169,6 +179,17 @@ static PDNetworkManager *__defaultManager;
 - (void)setNetworkCache:(id<PDNetworkCache>)networkCache {
     @synchronized (self) {
         _networkCache = networkCache;
+    }
+}
+
+- (void)setMaxConcurrentRequestCount:(NSUInteger)maxConcurrentRequestCount {
+    NSAssert(maxConcurrentRequestCount > 0 &&
+             maxConcurrentRequestCount < 20,
+             @"Invalid argument maxConcurrentRequestCount");
+    
+    @synchronized (self) {
+        _maxConcurrentRequestCount = maxConcurrentRequestCount;
+        self.operationQueue.maxConcurrentOperationCount = _maxConcurrentRequestCount;
     }
 }
 
