@@ -10,7 +10,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol PDNetworkPluginNotify <PDNetworkPlugin>
+@protocol PDNetworkPluginNotify <NSObject>
+
+- (void)requestWillStartLoad:(PDNetworkRequest *)request;
+- (void)requestDidFinishLoad:(PDNetworkRequest *)request withResponse:(id<PDNetworkResponse>)response;
+- (void)requestDidFinishUpload:(PDNetworkRequest *)request withResponse:(id<PDNetworkUploadResponse>)response;
+- (void)requestDidFinishDownload:(PDNetworkRequest *)request withResponse:(id<PDNetworkDownloadResponse>)response;
 
 @end
 

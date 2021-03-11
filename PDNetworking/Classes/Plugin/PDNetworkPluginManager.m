@@ -41,8 +41,8 @@ static PDNetworkPluginManager *__defaultManager;
 }
 
 - (void)loadPlugins {
-    NSMutableArray *plugins = [NSMutableArray array];
-    NSMutableDictionary *pluginMap = [NSMutableDictionary dictionary];
+    NSMutableArray<id<PDNetworkPlugin>> *plugins = [NSMutableArray array];
+    NSMutableDictionary<NSString *, id<PDNetworkPlugin>> *pluginMap = [NSMutableDictionary dictionary];
 
     Dl_info info; dladdr(&__defaultManager, &info);
     
@@ -73,8 +73,13 @@ static PDNetworkPluginManager *__defaultManager;
         [plugins addObject:plugin];
     }
     
-    _pluginMap = [pluginMap copy];
+    // sort by priority
+    [plugins sortUsingComparator:^NSComparisonResult(id<PDNetworkPlugin> obj1, id<PDNetworkPlugin> obj2) {
+        return obj1.priority < obj2.priority ? NSOrderedDescending : NSOrderedAscending;
+    }];
+    
     _plugins = [plugins copy];
+    _pluginMap = [pluginMap copy];
 }
 
 #pragma mark - PDNetworkPluginNotify

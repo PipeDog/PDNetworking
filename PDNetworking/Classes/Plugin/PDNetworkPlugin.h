@@ -23,11 +23,14 @@ static const PDNetworkPluginName __PD_exp_networkplugin_##pluginname##__ = {#plu
 
 #define PD_EXPORT_NETWORK_PLUGIN(pluginname, classname) __PD_EXPORT_NETWORK_PLUGIN_EX(pluginname, classname))
 
+typedef NSInteger PDNetworkPluginPriority NS_TYPED_EXTENSIBLE_ENUM;
+
 @protocol PDNetworkPlugin <NSObject>
 
 @optional
-- (void)requestWillStartLoad:(PDNetworkRequest *)request;
+- (PDNetworkPluginPriority)priority;
 
+- (void)requestWillStartLoad:(PDNetworkRequest *)request;
 - (void)requestDidFinishLoad:(PDNetworkRequest *)request withResponse:(id<PDNetworkResponse>)response;
 - (void)requestDidFinishUpload:(PDNetworkRequest *)request withResponse:(id<PDNetworkUploadResponse>)response;
 - (void)requestDidFinishDownload:(PDNetworkRequest *)request withResponse:(id<PDNetworkDownloadResponse>)response;
