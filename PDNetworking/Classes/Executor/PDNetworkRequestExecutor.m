@@ -25,10 +25,6 @@
     }
 }
 
-- (void)dealloc {
-    [self freeIvars];
-}
-
 - (instancetype)initWithRequest:(PDNetworkRequest *)request
                  sessionManager:(AFHTTPSessionManager *)sessionManager {
     if (!request.requestID) {
@@ -101,7 +97,6 @@
 
         if (!_URLRequest || outError) {
             NSAssert(_URLRequest || !outError, @"Build `URLRequest` failed!");
-            [self freeIvars];
             return nil;
         }
         
@@ -110,7 +105,6 @@
         
         if (!_request.sessionTask) {
             NSAssert(_request.sessionTask, @"Create `sessionTask` failed!");
-            [self freeIvars];
             return nil;
         }
     }
@@ -175,17 +169,6 @@
 
 - (void)unlock {
     [self->_lock unlock];
-}
-
-- (void)freeIvars {
-    _request = nil;
-    _sessionManager = nil;
-    _requestCacheID = nil;
-    _URLRequest = nil;
-    _requestSerializer = nil;
-    _responseSerializer = nil;
-    _doneHandler = nil;
-    _lock = nil;
 }
 
 @end

@@ -43,7 +43,6 @@
         }
 
         if (!continueRequesting) {
-            [self freeIvars];
             return nil;
         }
     }
@@ -65,11 +64,6 @@
         [strongSelf _handleResponse:parsedData error:error];
         [strongSelf unlock];
     }];
-}
-
-- (void)freeIvars {
-    _cache = nil;
-    [super freeIvars];
 }
 
 #pragma mark - Private Methods
