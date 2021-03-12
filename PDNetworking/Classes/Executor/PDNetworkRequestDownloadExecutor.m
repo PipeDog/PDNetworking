@@ -30,7 +30,7 @@
         [self lock];
         [self _handleResponse:filePath error:error];
         [self unlock];
-    }];;
+    }];
 }
 
 #pragma mark - Private Methods
