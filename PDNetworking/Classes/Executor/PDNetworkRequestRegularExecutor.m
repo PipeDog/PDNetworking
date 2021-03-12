@@ -43,6 +43,7 @@
         }
 
         if (!continueRequesting) {
+            [self freeIvars];
             return nil;
         }
     }
@@ -51,15 +52,24 @@
 
 #pragma mark - Internal Methods
 - (NSURLSessionTask *)sessionTask {
+    __weak typeof(self) weakSelf = self;
     return [self.sessionManager dataTaskWithRequest:self.URLRequest
                                      uploadProgress:nil
                                    downloadProgress:nil
                                   completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-        [self lock];
-        id parsedData = [self parseResponseData:responseObject outError:nil];
-        [self _handleResponse:parsedData error:error];
-        [self unlock];
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        [strongSelf lock];
+        id parsedData = [strongSelf parseResponseData:responseObject outError:nil];
+        [strongSelf _handleResponse:parsedData error:error];
+        [strongSelf unlock];
     }];
+}
+
+- (void)freeIvars {
+    _cache = nil;
+    [super freeIvars];
 }
 
 #pragma mark - Private Methods
@@ -80,8 +90,12 @@
     id<PDNetworkResponse> response = [[PDNetworkResponse alloc] init];
     response.data = data;
     
-    dispatch_async(self.request.completionQueue ?: dispatch_get_main_queue(), ^{
-        !self.request.success ?: self.request.success(response);
+    // `self` maybe dealloc when execute success callback, hold queue and success
+    dispatch_queue_t queue = self.request.completionQueue ?: dispatch_get_main_queue();
+    void (^success)(id<PDNetworkResponse>) = self.request.success;
+    
+    dispatch_async(queue, ^{
+        !success ?: success(response);
     });
 }
 
