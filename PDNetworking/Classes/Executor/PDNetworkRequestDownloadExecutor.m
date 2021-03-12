@@ -11,13 +11,20 @@
 
 #pragma mark - Internal Methods
 - (NSURLSessionTask *)sessionTask {
+    __weak typeof(self) weakSelf = self;
     return [self.sessionManager downloadTaskWithRequest:self.URLRequest progress:^(NSProgress * _Nonnull downloadProgress) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            !self.request.downloadProgress ?: self.request.downloadProgress(downloadProgress);
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) { return; }
+            
+            !strongSelf.request.downloadProgress ?: strongSelf.request.downloadProgress(downloadProgress);
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return nil; }
+
         // Create intermediate dir path if needed
-        NSURL *fileURL = self.request.destination(targetPath, response);
+        NSURL *fileURL = strongSelf.request.destination(targetPath, response);
         BOOL isDir = NO; NSString *dirPath = [fileURL.path stringByDeletingLastPathComponent];
         BOOL dirExist = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
         
@@ -27,9 +34,12 @@
         
         return fileURL;
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-        [self lock];
-        [self _handleResponse:filePath error:error];
-        [self unlock];
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+
+        [strongSelf lock];
+        [strongSelf _handleResponse:filePath error:error];
+        [strongSelf unlock];
     }];
 }
 

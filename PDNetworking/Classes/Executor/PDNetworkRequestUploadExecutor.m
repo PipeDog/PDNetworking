@@ -11,14 +11,18 @@
 
 #pragma mark - Internal Methods
 - (NSURLSessionTask *)sessionTask {
+    __weak typeof(self) weakSelf = self;
     return [self.sessionManager dataTaskWithRequest:self.URLRequest
                                      uploadProgress:self.request.uploadProgress
                                    downloadProgress:nil
                                   completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-        [self lock];
-        id parsedData = [self parseResponseData:responseObject outError:nil];
-        [self _handleResponse:parsedData error:error];
-        [self unlock];
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        [strongSelf lock];
+        id parsedData = [strongSelf parseResponseData:responseObject outError:nil];
+        [strongSelf _handleResponse:parsedData error:error];
+        [strongSelf unlock];
     }];
 }
 
