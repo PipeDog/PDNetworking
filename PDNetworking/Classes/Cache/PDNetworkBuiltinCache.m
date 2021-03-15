@@ -6,8 +6,13 @@
 //
 
 #import "PDNetworkBuiltinCache.h"
-#import "YYDiskCache.h"
 #import "PDNetworkDataUtil.h"
+
+#if __has_include(<YYCache/YYDiskCache.h>)
+#import <YYCache/YYDiskCache.h>
+#else
+#import "YYDiskCache.h"
+#endif
 
 @implementation PDNetworkBuiltinCache {
     YYDiskCache *_diskCache;
