@@ -34,8 +34,7 @@ id PDNTValueToJSONObject(id value) {
         return JSONObject;
     }
     
-    NSString *fmt = [NSString stringWithFormat:@"Invalid `value` type : %@", [value class]];
-    NSCAssert(NO, fmt);
+    NSCAssert(NO, @"Invalid `value` type : %@", [value class]);
     return nil;
 }
 
@@ -60,8 +59,7 @@ NSData *PDNTValueToData(id value) {
         return data;
     }
     
-    NSString *fmt = [NSString stringWithFormat:@"Invalid `value` type : %@", [value class]];
-    NSCAssert(NO, fmt);
+    NSCAssert(NO, @"Invalid `value` type : %@", [value class]);
     return nil;
 }
 

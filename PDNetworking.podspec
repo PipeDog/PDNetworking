@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'PDNetworking'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of PDNetworking.'
+  s.summary          = 'Lightweight networking framework based on AFNetworking.'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -21,11 +21,11 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://github.com/liang/PDNetworking'
+  s.homepage         = 'https://github.com/PipeDog/PDNetworking'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'liang' => '1007279249@qq.com' }
-  s.source           = { :git => 'https://github.com/liang/PDNetworking.git', :tag => s.version.to_s }
+  s.author           = { 'liang' => 'leiliang0128@163.com' }
+  s.source           = { :git => 'https://github.com/PipeDog/PDNetworking.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '9.0'
