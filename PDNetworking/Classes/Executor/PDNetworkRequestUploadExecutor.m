@@ -6,6 +6,7 @@
 //
 
 #import "PDNetworkRequestUploadExecutor.h"
+#import "PDNetworkResponser+Internal.h"
 
 @implementation PDNetworkRequestUploadExecutor
 
@@ -13,7 +14,7 @@
 - (NSURLSessionTask *)sessionTask {
     __weak typeof(self) weakSelf = self;
     return [self.sessionManager dataTaskWithRequest:self.URLRequest
-                                     uploadProgress:self.request.uploadProgress
+                                     uploadProgress:self.responser.progress
                                    downloadProgress:nil
                                   completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -50,15 +51,14 @@
         response.error = error;
         [[PDNetworkPluginManager defaultManager] requestDidFinishUpload:self.request withResponse:response];
         
-        if (!error) {
-            !self.request.uploadSuccess ?: self.request.uploadSuccess(response);
-        } else {
-            !self.request.uploadFailure ?: self.request.uploadFailure(response);
-        }
-        
-        [self.request removeRequestBlocks];
+        !self.responser.responseHandler ?: self.responser.responseHandler(response);
+        [self.request unbindResponser];
         !self.doneHandler ?: self.doneHandler(!!(responseObject && !error), error);
     });
+}
+
+- (PDNetworkUploadResponser *)responser {
+    return (PDNetworkUploadResponser *)self.request.responser;
 }
 
 @end

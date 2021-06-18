@@ -30,39 +30,19 @@
 }
 
 #pragma mark - Public Methods
-- (instancetype)sendWithSuccess:(void (^)(id<PDNetworkResponse> _Nonnull))success
-                        failure:(void (^)(id<PDNetworkResponse> _Nonnull))failure {
-    self.requestType = PDNetworkRequestTypeRegular;
-    self.success = success;
-    self.failure = failure;
-    [[PDNetworkManager defaultManager] addRequest:self];
-    return self;
-}
+- (instancetype)sendWithResponser:(__kindof PDNetworkResponser *)responser {
 
-- (instancetype)downloadWithProgress:(void (^)(NSProgress * _Nonnull))downloadProgressBlock
-                         destination:(NSURL * _Nonnull (^)(NSURL * _Nonnull, NSURLResponse * _Nonnull))destination
-                             success:(void (^)(id<PDNetworkDownloadResponse> _Nonnull))success
-                             failure:(void (^)(id<PDNetworkDownloadResponse> _Nonnull))failure {
-    NSAssert(destination != nil, @"The block `destination` can not be nil!");
+    if ([responser isKindOfClass:[PDNetworkDataResponser class]]) {
+        self.requestType = PDNetworkRequestTypeData;
+    } else if ([responser isKindOfClass:[PDNetworkUploadResponser class]]) {
+        self.requestType = PDNetworkRequestTypeUpload;
+    } else if ([responser isKindOfClass:[PDNetworkDownloadResponser class]]) {
+        self.requestType = PDNetworkRequestTypeDownload;
+    } else {
+        NSAssert(NO, @"Invalid responser class `%@`", NSStringFromClass([responser class]));
+    }
     
-    self.requestType = PDNetworkRequestTypeDownload;
-    self.downloadProgress = downloadProgressBlock;
-    self.destination = destination;
-    self.downloadSuccess = success;
-    self.downloadFailure = failure;
-    [[PDNetworkManager defaultManager] addRequest:self];
-    return self;
-}
-
-- (instancetype)uploadWithConstructingBody:(void (^)(id<PDMultipartFormData> _Nonnull))block
-                                  progress:(void (^)(NSProgress * _Nonnull))uploadProgress
-                                   success:(void (^)(id<PDNetworkUploadResponse> _Nonnull))success
-                                   failure:(void (^)(id<PDNetworkUploadResponse> _Nonnull))failure {
-    self.requestType = PDNetworkRequestTypeUpload;
-    self.constructingBody = block;
-    self.uploadProgress = uploadProgress;
-    self.uploadSuccess = success;
-    self.uploadFailure = failure;
+    self.responser = responser;
     [[PDNetworkManager defaultManager] addRequest:self];
     return self;
 }
@@ -79,17 +59,8 @@
 }
 
 #pragma mark - Private Methods
-- (void)removeRequestBlocks {
-    _success = nil;
-    _failure = nil;
-    _downloadProgress = nil;
-    _destination = nil;
-    _downloadSuccess = nil;
-    _downloadFailure = nil;
-    _uploadProgress = nil;
-    _constructingBody = nil;
-    _uploadSuccess = nil;
-    _uploadFailure = nil;
+- (void)unbindResponser {
+    self.responser = nil;
 }
 
 #pragma mark - Getter Methods

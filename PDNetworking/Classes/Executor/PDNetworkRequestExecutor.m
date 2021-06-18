@@ -10,6 +10,7 @@
 #import "PDNetworkRequestRegularExecutor.h"
 #import "PDNetworkRequestUploadExecutor.h"
 #import "PDNetworkRequestDownloadExecutor.h"
+#import "PDNetworkResponser+Internal.h"
 
 @implementation PDNetworkRequestExecutor {
     NSRecursiveLock *_lock;
@@ -18,7 +19,7 @@
 
 + (Class)executorClassWithRequestType:(PDNetworkRequestType)requestType {
     switch (requestType) {
-        case PDNetworkRequestTypeRegular: return [PDNetworkRequestRegularExecutor class];
+        case PDNetworkRequestTypeData: return [PDNetworkRequestRegularExecutor class];
         case PDNetworkRequestTypeUpload: return [PDNetworkRequestUploadExecutor class];
         case PDNetworkRequestTypeDownload: return [PDNetworkRequestDownloadExecutor class];
         default: return nil;
@@ -82,14 +83,15 @@
         NSDictionary *parameters = _request.parameters;
         
         switch (_request.requestType) {
-            case PDNetworkRequestTypeRegular: {
+            case PDNetworkRequestTypeData: {
                 _URLRequest = [requestSerializer requestWithMethod:method URLString:fullUrl parameters:parameters error:&outError];
             } break;
             case PDNetworkRequestTypeDownload: {
                 _URLRequest = [requestSerializer requestWithMethod:method URLString:fullUrl parameters:parameters error:&outError];
             } break;
             case PDNetworkRequestTypeUpload: {
-                void (^constructingBody)(id<AFMultipartFormData>) = (void (^)(id<AFMultipartFormData>))request.constructingBody;
+                PDNetworkUploadResponser *uploadResponser = (PDNetworkUploadResponser *)request.responser;
+                void (^constructingBody)(id<AFMultipartFormData>) = (void (^)(id<AFMultipartFormData>))uploadResponser.constructingBody;
                 _URLRequest = [requestSerializer multipartFormRequestWithMethod:method URLString:fullUrl parameters:parameters constructingBodyWithBlock:constructingBody error:&outError];
             } break;
             default: break;
