@@ -115,6 +115,8 @@ static PDNetworkManager *__defaultManager;
         return;
     }
     
+    [[PDNetworkPluginManager defaultManager] requestWillStartLoad:request];
+
     pthread_rwlock_rdlock(&_lock);
     PDNetworkRequestExecutor *executor = self.executorMap[request.requestID];
     pthread_rwlock_unlock(&_lock);
@@ -129,9 +131,7 @@ static PDNetworkManager *__defaultManager;
     self.requestMap[request.requestID] = request;
     self.executorMap[request.requestID] = executor;
     pthread_rwlock_unlock(&_lock);
-    
-    [[PDNetworkPluginManager defaultManager] requestWillStartLoad:request];
-    
+        
     [executor executeWithDoneHandler:^(BOOL success, NSError * _Nullable error) {
         pthread_rwlock_wrlock(&(self->_lock));
         [self.requestMap removeObjectForKey:request.requestID];
