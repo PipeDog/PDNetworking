@@ -7,12 +7,16 @@
 //
 
 #import "PDAppDelegate.h"
+#import <PDNetworkPluginManager.h>
 
 @implementation PDAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    NSDictionary<NSString *, id<PDNetworkPlugin>> *pluginMap = [PDNetworkPluginManager defaultManager].pluginMap;
+    NSLog(@"collect plugin : %@", pluginMap);
+    
     return YES;
 }
 
