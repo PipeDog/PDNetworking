@@ -8,6 +8,7 @@
 #import "PDNetworkPluginManager.h"
 #import <dlfcn.h>
 #import <mach-o/getsect.h>
+#import <mach-o/dyld.h>
 
 @implementation PDNetworkPluginManager
 
@@ -44,33 +45,42 @@ static PDNetworkPluginManager *__defaultManager;
     NSMutableArray<id<PDNetworkPlugin>> *plugins = [NSMutableArray array];
     NSMutableDictionary<NSString *, id<PDNetworkPlugin>> *pluginMap = [NSMutableDictionary dictionary];
 
-    Dl_info info; dladdr(&__defaultManager, &info);
-    
+    for (uint32_t index = 0; index < _dyld_image_count(); index++) {
 #ifdef __LP64__
-    uint64_t addr = 0; const uint64_t mach_header = (uint64_t)info.dli_fbase;
-    const struct section_64 *section = getsectbynamefromheader_64((void *)mach_header, "__DATA", "_pd_netplugins");
+        uint64_t addr = 0;
+        const struct mach_header_64 *header = (const struct mach_header_64 *)_dyld_get_image_header(index);
+        const struct section_64 *section = getsectbynamefromheader_64(header, "__DATA", "_pd_netplugins");
 #else
-    uint32_t addr = 0; const uint32_t mach_header = (uint32_t)info.dli_fbase;
-    const struct section *section = getsectbynamefromheader((void *)mach_header, "__DATA", "_pd_netplugins");
+        uint32_t addr = 0;
+        const struct mach_header *header = (const struct mach_header *)_dyld_get_image_header(index);
+        const struct section *section = getsectbynamefromheader(header, "__DATA", "_pd_netplugins");
 #endif
-    
-    if (section == NULL) { return; }
-    
-    for (addr = section->offset; addr < section->offset + section->size; addr += sizeof(PDNetworkPluginName)) {
-        PDNetworkPluginName *name = (PDNetworkPluginName *)(mach_header + addr);
-        if (!name) { continue; }
-                
-        NSString *pluginname = [NSString stringWithUTF8String:name->pluginname];
-        NSString *classname = [NSString stringWithUTF8String:name->classname];
         
-        if (pluginMap[pluginname]) {
+        if (section == NULL) { continue; }
+        
+        if (header->filetype != MH_OBJECT && header->filetype != MH_EXECUTE && header->filetype != MH_DYLIB) {
             continue;
         }
         
-        Class pluginClass = NSClassFromString(classname);
-        id<PDNetworkPlugin> plugin = [[pluginClass alloc] init];
-        pluginMap[pluginname] = plugin;
-        [plugins addObject:plugin];
+        for (addr = section->offset; addr < section->offset + section->size; addr += sizeof(PDNetworkPluginName)) {
+#ifdef __LP64__
+            PDNetworkPluginName *name = (PDNetworkPluginName *)((uint64_t)header + addr);
+#else
+            PDNetworkPluginName *name = (PDNetworkPluginName *)((uint32_t)header + addr);
+#endif
+            if (!name) { continue; }
+            NSString *pluginname = [NSString stringWithUTF8String:name->pluginname];
+            NSString *classname = [NSString stringWithUTF8String:name->classname];
+            
+            if (pluginMap[pluginname]) {
+                continue;
+            }
+            
+            Class pluginClass = NSClassFromString(classname);
+            id<PDNetworkPlugin> plugin = [[pluginClass alloc] init];
+            pluginMap[pluginname] = plugin;
+            [plugins addObject:plugin];
+        }
     }
     
     // sort by priority

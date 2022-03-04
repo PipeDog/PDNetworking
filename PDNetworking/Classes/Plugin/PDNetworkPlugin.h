@@ -19,21 +19,25 @@ typedef struct {
 
 #define __PD_EXPORT_NETWORK_PLUGIN_EX(pluginname, classname)    \
 __attribute__((used, section("__DATA , _pd_netplugins")))       \
-static const PDNetworkPluginName __PD_exp_networkplugin_##pluginname##__ = {#pluginname, #classname}
+static const PDNetworkPluginName __PD_exp_networkplugin_##pluginname##__ = {#pluginname, #classname};
 
-#define PD_EXPORT_NETWORK_PLUGIN(pluginname, classname) __PD_EXPORT_NETWORK_PLUGIN_EX(pluginname, classname))
+#define PD_EXPORT_NETWORK_PLUGIN(pluginname, classname) __PD_EXPORT_NETWORK_PLUGIN_EX(pluginname, classname)
 
 typedef NSInteger PDNetworkPluginPriority NS_TYPED_EXTENSIBLE_ENUM;
 
-@protocol PDNetworkPlugin <NSObject>
-
-@optional
-- (PDNetworkPluginPriority)priority;
+@protocol PDNetworkRequestPhases <NSObject>
 
 - (void)requestWillStartLoad:(PDNetworkRequest *)request;
 - (void)requestDidFinishLoad:(PDNetworkRequest *)request withResponse:(id<PDNetworkResponse>)response;
 - (void)requestDidFinishUpload:(PDNetworkRequest *)request withResponse:(id<PDNetworkUploadResponse>)response;
 - (void)requestDidFinishDownload:(PDNetworkRequest *)request withResponse:(id<PDNetworkDownloadResponse>)response;
+
+@end
+
+@protocol PDNetworkPlugin <PDNetworkRequestPhases>
+
+@optional
+- (PDNetworkPluginPriority)priority;
 
 @end
 
