@@ -1,18 +1,18 @@
 {
   "name": "PDNetworking",
   "version": "0.1.0",
-  "summary": "Lightweight networking framework based on AFNetworking.",
+  "summary": "A short description of PDNetworking.",
   "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/PipeDog/PDNetworking",
+  "homepage": "https://github.com/liang/PDNetworking",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
   },
   "authors": {
-    "liang": "leiliang0128@163.com"
+    "liang": "1007279249@qq.com"
   },
   "source": {
-    "git": "https://github.com/PipeDog/PDNetworking.git",
+    "git": "https://github.com/liang/PDNetworking.git",
     "tag": "0.1.0"
   },
   "platforms": {

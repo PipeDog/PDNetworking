@@ -7,7 +7,6 @@
 
 #import "PDNetworkRequestRegularExecutor.h"
 #import "PDNetworkManager.h"
-#import "PDNetworkResponser+Internal.h"
 
 @interface PDNetworkRequestRegularExecutor ()
 
@@ -87,7 +86,7 @@
     
     // `self` maybe dealloc when execute success callback, hold queue and success
     dispatch_queue_t queue = self.request.completionQueue ?: dispatch_get_main_queue();
-    void (^success)(id<PDNetworkResponse>) = self.responser.responseHandler;
+    void (^success)(id<PDNetworkResponse>) = self.request.success;
     
     dispatch_async(queue, ^{
         !success ?: success(response);
@@ -117,14 +116,17 @@
         response.error = error;
         [[PDNetworkPluginManager defaultManager] requestDidFinishLoad:self.request withResponse:response];
         
-        !self.responser.responseHandler ?: self.responser.responseHandler(response);
-        [self.request unbindResponser];
+        if (!error) {
+            !self.request.success ?: self.request.success(response);
+            // Save cache data after callback
+            [self.cache setObject:responseObject forKey:self.requestCacheID withBlock:nil];
+        } else {
+            !self.request.failure ?: self.request.failure(response);
+        }
+        
+        [self.request removeRequestBlocks];
         !self.doneHandler ?: self.doneHandler(!!(responseObject && !error), error);
     });
-}
-
-- (PDNetworkDataResponser *)responser {
-    return (PDNetworkDataResponser *)self.request.responser;
 }
 
 @end

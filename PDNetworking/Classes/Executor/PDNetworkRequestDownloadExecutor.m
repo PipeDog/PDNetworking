@@ -6,7 +6,6 @@
 //
 
 #import "PDNetworkRequestDownloadExecutor.h"
-#import "PDNetworkResponser+Internal.h"
 
 @implementation PDNetworkRequestDownloadExecutor
 
@@ -18,14 +17,14 @@
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) { return; }
             
-            !strongSelf.responser.progress ?: strongSelf.responser.progress(downloadProgress);
+            !strongSelf.request.downloadProgress ?: strongSelf.request.downloadProgress(downloadProgress);
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return nil; }
 
         // Create intermediate dir path if needed
-        NSURL *fileURL = strongSelf.responser.destination(targetPath, response);
+        NSURL *fileURL = strongSelf.request.destination(targetPath, response);
         BOOL isDir = NO; NSString *dirPath = [fileURL.path stringByDeletingLastPathComponent];
         BOOL dirExist = [[NSFileManager defaultManager] fileExistsAtPath:dirPath isDirectory:&isDir];
         
@@ -68,14 +67,15 @@
         response.error = error;
         [[PDNetworkPluginManager defaultManager] requestDidFinishDownload:self.request withResponse:response];
         
-        !self.responser.responseHandler ?: self.responser.responseHandler(response);
-        [self.request unbindResponser];
+        if (!error) {
+            !self.request.downloadSuccess ?: self.request.downloadSuccess(response);
+        } else {
+            !self.request.downloadFailure ?: self.request.downloadFailure(response);
+        }
+        
+        [self.request removeRequestBlocks];
         !self.doneHandler ?: self.doneHandler(!!(fileURL && !error), error);
     });
-}
-
-- (PDNetworkDownloadResponser *)responser {
-    return (PDNetworkDownloadResponser *)self.request.responser;
 }
 
 @end

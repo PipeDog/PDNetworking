@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "PDNetworkResponse.h"
 #import "PDNetworkDefinition.h"
-#import "PDMultipartFormData.h"
-#import "PDNetworkResponser.h"
 
 #if __has_include(<AFNetworking/AFNetworking.h>)
 #import <AFNetworking/AFNetworking.h>
@@ -40,10 +38,25 @@ typedef NSString * PDNetworkRequestID;
 @property (nonatomic, copy, nullable) __kindof NSURLSessionTask *(^customSessionTask)(void); // All the other constructing properties are ignored if the `customSessionTask` is not nil, and need to manage PDNetworkRequest instance memory by yourself.
 @property (nonatomic, readonly, getter=isExecuting) BOOL executing;
 
-- (instancetype)sendWithResponser:(__kindof PDNetworkResponser *)responser;
+- (instancetype)sendWithSuccess:(void (^ __nullable)(id<PDNetworkResponse> response))success
+                        failure:(void (^ __nullable)(id<PDNetworkResponse> response))failure;
+
+- (instancetype)downloadWithProgress:(void (^ __nullable)(NSProgress *downloadProgress))downloadProgressBlock
+                         destination:(NSURL * (^ __nonnull)(NSURL *targetPath, NSURLResponse *response))destination
+                             success:(void (^ __nullable)(id<PDNetworkDownloadResponse> response))success
+                             failure:(void (^ __nullable)(id<PDNetworkDownloadResponse> response))failure;
+
+- (instancetype)uploadWithConstructingBody:(void (^ __nullable)(id<PDMultipartFormData> formData))block
+                                  progress:(void (^ __nullable)(NSProgress *uploadProgress))uploadProgress
+                                   success:(void (^ __nullable)(id<PDNetworkUploadResponse> response))success
+                                   failure:(void (^ __nullable)(id<PDNetworkUploadResponse> response))failure;
 
 - (void)cancel;
 - (PDNetworkRequestID)requestID;
+
+@end
+
+@protocol PDMultipartFormData <AFMultipartFormData>
 
 @end
 

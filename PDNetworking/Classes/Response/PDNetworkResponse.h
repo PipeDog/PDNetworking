@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol PDNetworkResponse <NSObject>
 
-@property (nonatomic, strong, nullable) NSURLResponse *URLResponse;
+@property (nonatomic, strong, nullable) __kindof NSURLResponse *URLResponse;
 @property (nonatomic, strong, nullable) id data;
 @property (nonatomic, strong, nullable) NSError *error;
 
@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol PDNetworkUploadResponse <NSObject>
 
-@property (nonatomic, strong, nullable) NSURLResponse *URLResponse;
+@property (nonatomic, strong, nullable) __kindof NSURLResponse *URLResponse;
 @property (nonatomic, strong, nullable) id data;
 @property (nonatomic, strong, nullable) NSError *error;
 
@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol PDNetworkDownloadResponse <NSObject>
 
-@property (nonatomic, strong, nullable) NSURLResponse *URLResponse;
+@property (nonatomic, strong, nullable)  __kindof NSURLResponse *URLResponse;
 @property (nonatomic, strong, nullable) NSURL *filePath;
 @property (nonatomic, strong, nullable) NSError *error;
 

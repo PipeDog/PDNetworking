@@ -11,18 +11,30 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, PDNetworkRequestType) {
-    PDNetworkRequestTypeData        = 0,
-    PDNetworkRequestTypeDownload    = 1,
-    PDNetworkRequestTypeUpload      = 2,
+    PDNetworkRequestTypeRegular   = 0,
+    PDNetworkRequestTypeDownload  = 1,
+    PDNetworkRequestTypeUpload    = 2,
 };
 
 @interface PDNetworkRequest ()
 
 @property (nonatomic, strong, nullable) NSURLSessionTask *sessionTask;
 @property (nonatomic, assign) PDNetworkRequestType requestType;
-@property (nonatomic, strong, nullable) PDNetworkResponser *responser;
 
-- (void)unbindResponser;
+@property (nonatomic, copy, nullable) void (^success)(id<PDNetworkResponse>);
+@property (nonatomic, copy, nullable) void (^failure)(id<PDNetworkResponse>);
+
+@property (nonatomic, copy, nullable) void (^downloadProgress)(NSProgress *);
+@property (nonatomic, copy, nullable) NSURL * (^destination)(NSURL *, NSURLResponse *);
+@property (nonatomic, copy, nullable) void (^downloadSuccess)(id<PDNetworkDownloadResponse>);
+@property (nonatomic, copy, nullable) void (^downloadFailure)(id<PDNetworkDownloadResponse>);
+
+@property (nonatomic, copy, nullable) void (^uploadSuccess)(id<PDNetworkUploadResponse>);
+@property (nonatomic, copy, nullable) void (^uploadFailure)(id<PDNetworkUploadResponse>);
+@property (nonatomic, copy, nullable) void (^uploadProgress)(NSProgress *);
+@property (nonatomic, copy, nullable) void (^constructingBody)(id<PDMultipartFormData>);
+
+- (void)removeRequestBlocks;
 
 @end
 

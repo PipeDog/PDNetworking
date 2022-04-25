@@ -10,6 +10,9 @@
 #define PDNetworking_h
 
 #import "PDNetworkManager.h"
+#import "PDNetworkRequest.h"
+#import "PDNetworkResponse.h"
+#import "PDNetworkManager+Constructing.h"
 #import "PDNetworkRequest+Build.h"
 #import "PDNetworkPlugin.h"
 
