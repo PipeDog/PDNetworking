@@ -29,6 +29,7 @@
 #import "PDNetworkResponse.h"
 #import "NSString+PDNetworking.h"
 #import "PDNetworkDataUtil.h"
+#import "PDNetworkRequestUtil.h"
 #import "PDNetworkUUID.h"
 
 FOUNDATION_EXPORT double PDNetworkingVersionNumber;

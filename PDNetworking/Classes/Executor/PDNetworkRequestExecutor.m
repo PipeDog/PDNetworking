@@ -10,6 +10,7 @@
 #import "PDNetworkRequestRegularExecutor.h"
 #import "PDNetworkRequestUploadExecutor.h"
 #import "PDNetworkRequestDownloadExecutor.h"
+#import "PDNetworkRequestUtil.h"
 
 @implementation PDNetworkRequestExecutor {
     NSRecursiveLock *_lock;
@@ -49,9 +50,7 @@
         }
               
         // Create request cache id
-        NSString *requestCacheID = [fullUrl copy];
-        requestCacheID = [requestCacheID pdnt_urlStringWithParameters:_request.parameters];
-        _requestCacheID = [requestCacheID pdnt_encodeWithURLQueryAllowedCharacterSet];
+        _requestCacheID = [PDNetworkRequestUtil getCacheIDForRequest:request];
         
         // Request serializer
         AFHTTPRequestSerializer *requestSerializer = [AFHTTPRequestSerializer serializer];
