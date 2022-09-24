@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSUInteger, PDNetworkRequestType) {
-    PDNetworkRequestTypeRegular   = 0,
+    PDNetworkRequestTypeGeneric   = 0,
     PDNetworkRequestTypeDownload  = 1,
     PDNetworkRequestTypeUpload    = 2,
 };

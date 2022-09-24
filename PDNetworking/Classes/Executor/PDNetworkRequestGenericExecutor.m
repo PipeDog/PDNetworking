@@ -5,16 +5,16 @@
 //  Created by liang on 2021/3/4.
 //
 
-#import "PDNetworkRequestRegularExecutor.h"
+#import "PDNetworkRequestGenericExecutor.h"
 #import "PDNetworkManager.h"
 
-@interface PDNetworkRequestRegularExecutor ()
+@interface PDNetworkRequestGenericExecutor ()
 
 @property (nonatomic, strong) id<PDNetworkCache> cache;
 
 @end
 
-@implementation PDNetworkRequestRegularExecutor
+@implementation PDNetworkRequestGenericExecutor
 
 - (instancetype)initWithRequest:(PDNetworkRequest *)request sessionManager:(AFHTTPSessionManager *)sessionManager {
     self = [super initWithRequest:request sessionManager:sessionManager];

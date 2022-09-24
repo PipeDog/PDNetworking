@@ -7,7 +7,7 @@
 
 #import "PDNetworkRequestExecutor.h"
 #import "NSString+PDNetworking.h"
-#import "PDNetworkRequestRegularExecutor.h"
+#import "PDNetworkRequestGenericExecutor.h"
 #import "PDNetworkRequestUploadExecutor.h"
 #import "PDNetworkRequestDownloadExecutor.h"
 #import "PDNetworkRequestUtil.h"
@@ -19,7 +19,7 @@
 
 + (Class)executorClassWithRequestType:(PDNetworkRequestType)requestType {
     switch (requestType) {
-        case PDNetworkRequestTypeRegular: return [PDNetworkRequestRegularExecutor class];
+        case PDNetworkRequestTypeGeneric: return [PDNetworkRequestGenericExecutor class];
         case PDNetworkRequestTypeUpload: return [PDNetworkRequestUploadExecutor class];
         case PDNetworkRequestTypeDownload: return [PDNetworkRequestDownloadExecutor class];
         default: return nil;
@@ -81,7 +81,7 @@
         NSDictionary *parameters = _request.parameters;
         
         switch (_request.requestType) {
-            case PDNetworkRequestTypeRegular: {
+            case PDNetworkRequestTypeGeneric: {
                 _URLRequest = [requestSerializer requestWithMethod:method URLString:fullUrl parameters:parameters error:&outError];
             } break;
             case PDNetworkRequestTypeDownload: {

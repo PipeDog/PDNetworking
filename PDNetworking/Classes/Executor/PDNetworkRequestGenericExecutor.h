@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface PDNetworkRequestRegularExecutor : PDNetworkRequestExecutor
+@interface PDNetworkRequestGenericExecutor : PDNetworkRequestExecutor
 
 @end
 

@@ -32,7 +32,7 @@
 #pragma mark - Public Methods
 - (instancetype)sendWithSuccess:(void (^)(id<PDNetworkResponse> _Nonnull))success
                         failure:(void (^)(id<PDNetworkResponse> _Nonnull))failure {
-    self.requestType = PDNetworkRequestTypeRegular;
+    self.requestType = PDNetworkRequestTypeGeneric;
     self.success = success;
     self.failure = failure;
     [[PDNetworkManager defaultManager] addRequest:self];
