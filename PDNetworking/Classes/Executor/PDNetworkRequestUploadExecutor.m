@@ -35,6 +35,7 @@
     
     if (self.currentRetryTimes < self.request.autoRetryTimes) {
         self.currentRetryTimes += 1;
+        self.request.sessionTask = self.sessionTask;
         [self.request.sessionTask resume];
         return;
     }
